@@ -1,177 +1,173 @@
-// js/directory.js
-
-const dataURL = "../data/members.json";
+// Directory page functionality
+const dataURL = "data/members.json";
 const membersContainer = document.querySelector("#members-container");
-// Select the buttons for view toggling (assuming you have them in your HTML)
-const gridbutton = document.querySelector("#grid-view-btn");
-const listbutton = document.querySelector("#list-view-btn");
+const gridButton = document.querySelector("#grid-view-btn");
+const listButton = document.querySelector("#list-view-btn");
 
-// --- Main Data Fetching Function ---
+let companiesData = [];
+
+// Main data fetching function
 async function getMemberData() {
   try {
     const response = await fetch(dataURL);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
     const data = await response.json();
-    // Start in 'grid' view by default (matching the initial CSS class)
-    displayMembers(data.companies, "grid");
+    
+    if (!data || !data.companies || !Array.isArray(data.companies)) {
+      throw new Error('Invalid data format');
+    }
+    
+    companiesData = data.companies;
+    displayMembers(companiesData, "grid");
+    
   } catch (error) {
     console.error("Error fetching member data:", error);
+    displayError();
   }
 }
 
-// --- Dynamic Display Function ---
-function displayMembers(companies, viewType) {
-  membersContainer.innerHTML = ""; // Clear existing content
+// Display error message
+function displayError() {
+  if (membersContainer) {
+    membersContainer.innerHTML = `
+      <div class="error-message" role="alert">
+        <h2>Unable to Load Business Directory</h2>
+        <p>Please try again later or contact support if the problem persists.</p>
+      </div>
+    `;
+  }
+}
 
-  // Set the appropriate class for styling the container
-  membersContainer.className = "";
-  membersContainer.classList.add(viewType); // 'grid' or 'list'
+// Dynamic display function
+function displayMembers(companies, viewType) {
+  if (!membersContainer) return;
+  
+  membersContainer.innerHTML = "";
+  membersContainer.className = viewType;
+
+  if (!Array.isArray(companies) || companies.length === 0) {
+    membersContainer.innerHTML = `
+      <div class="no-data-message">
+        <h2>No Businesses Found</h2>
+        <p>Check back later for business listings.</p>
+      </div>
+    `;
+    return;
+  }
 
   companies.forEach((company) => {
-    // Create the card/list item container
-    let memberCard = document.createElement("section");
+    if (!company || typeof company !== 'object') {
+      console.warn('Invalid company data:', company);
+      return;
+    }
+
+    const memberCard = document.createElement("article");
     memberCard.classList.add("member-card");
+    memberCard.setAttribute("role", "article");
 
-    // Content elements
-    let name = document.createElement("h3");
-    let address = document.createElement("p");
-    let phone = document.createElement("p");
-    let website = document.createElement("a");
-    let image = document.createElement("img");
-    let membership = document.createElement("p");
+    // Sanitize data
+    const name = escapeHtml(company.name || 'Unknown Business');
+    const address = escapeHtml(company.address || 'Address not available');
+    const phone = escapeHtml(company.phone || 'Phone not available');
+    const website = escapeHtml(company.website || '#');
+    const imagefile = escapeHtml(company.imagefile || 'placeholder.jpg');
+    const otherinfo = escapeHtml(company.otherinfo || 'No additional information');
 
-    // Populate elements
-    name.textContent = company.name;
-    address.textContent = company.address;
-    phone.textContent = company.phone;
+    // Determine membership level
+    let levelText = "Basic Member";
+    let levelClass = "level-1";
+    
+    if (company.membershiplevel === 3) {
+      levelText = "🥇 Gold Member";
+      levelClass = "level-3";
+    } else if (company.membershiplevel === 2) {
+      levelText = "🥈 Silver Member";
+      levelClass = "level-2";
+    } else if (company.membershiplevel === 1) {
+      levelText = "🥉 Bronze Member";
+      levelClass = "level-1";
+    }
 
-    website.textContent = company.website;
-    website.href = company.website;
-    website.target = "_blank"; // Open in new tab
+    memberCard.innerHTML = `
+      <div class="member-image">
+        <img src="images/${imagefile}" 
+             alt="${name} logo" 
+             loading="lazy"
+             onerror="this.src='images/placeholder.jpg'; this.alt='Logo not available';">
+      </div>
+      <div class="member-info">
+        <h3>${name}</h3>
+        <p class="membership-level ${levelClass}">${levelText}</p>
+        <p class="member-address"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${address}</p>
+        <p class="member-phone"><i class="fas fa-phone" aria-hidden="true"></i> ${phone}</p>
+        <p class="member-website">
+          <i class="fas fa-globe" aria-hidden="true"></i> 
+          <a href="${website}" target="_blank" rel="noopener noreferrer">${website.replace('https://', '').replace('http://', '')}</a>
+        </p>
+        <p class="member-info-text">${otherinfo}</p>
+      </div>
+    `;
 
-    image.setAttribute("src", `images/${company.imagefile}`); // Assuming images are in an 'images' folder
-    image.setAttribute("alt", `Logo of ${company.name}`);
-    image.setAttribute("loading", "lazy");
-
-    // Display membership level text
-    let levelText = "";
-    if (company.membershiplevel === 3) levelText = "Gold Member";
-    else if (company.membershiplevel === 2) levelText = "Silver Member";
-    else levelText = "Basic Member";
-    membership.textContent = levelText;
-    membership.classList.add(`level-${company.membershiplevel}`);
-
-    // Append elements to the card
-    memberCard.appendChild(name);
-    memberCard.appendChild(image);
-    memberCard.appendChild(address);
-    memberCard.appendChild(phone);
-    memberCard.appendChild(website);
-    memberCard.appendChild(membership);
-
-    // Append the card to the main container
     membersContainer.appendChild(memberCard);
   });
 }
 
-// --- Toggle Event Listeners ---
-gridbutton.addEventListener("click", () => {
-  // Read the data directly from the container if it exists, or re-fetch
-  if (membersContainer.classList.contains("list")) {
-    // A simpler approach: just change the class and let CSS handle the rest
-    membersContainer.classList.replace("list", "grid");
-  }
-});
-
-listbutton.addEventListener("click", () => {
-  if (membersContainer.classList.contains("grid")) {
-    membersContainer.classList.replace("grid", "list");
-  }
-});
-
-// Initial function call to start the process
-getMemberData();
-
-// Dark Mode Toggle
-const themeToggle = document.querySelector(".theme-toggle");
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  if (document.body.classList.contains("dark-mode")) {
-    themeToggle.textContent = "☀️";
-  } else {
-    themeToggle.textContent = "🌙";
-  }
-});
-
-// Mobile Menu Toggle
-const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
-const mainNav = document.querySelector(".main-nav");
-
-mobileMenuBtn.addEventListener("click", () => {
-  mainNav.classList.toggle("active");
-
-  // Change hamburger icon to X when menu is open
-  if (mainNav.classList.contains("active")) {
-    mobileMenuBtn.textContent = "✕";
-  } else {
-    mobileMenuBtn.textContent = "☰";
-  }
-});
-
-// Close menu when clicking outside
-document.addEventListener("click", (e) => {
-  if (!mobileMenuBtn.contains(e.target) && !mainNav.contains(e.target)) {
-    mainNav.classList.remove("active");
-    mobileMenuBtn.textContent = "☰";
-  }
-});
-
-// Update Last Modified Date
-document.getElementById("last-modified").textContent += document.lastModified;
-
-// Business Card Interaction
-const businessCards = document.querySelectorAll(".business-card");
-businessCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    // In a real implementation, this would navigate to the business detail page
-    alert(
-      "Viewing business details - this would navigate to a detail page in a full implementation"
-    );
-  });
-});
-
-// Membership Banner Close Functionality
-const membershipBanner = document.querySelector(".membership-banner");
-if (membershipBanner) {
-  setTimeout(() => {
-    membershipBanner.style.display = "none";
-  }, 10000); // Hide after 10 seconds
+// Utility function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-// CTA Button Functionality
-const ctaButtons = document.querySelectorAll(".cta-button");
-ctaButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    if (button.textContent.includes("Become a Member")) {
-      window.location.href = "#join";
-    } else if (button.textContent.includes("Learn More")) {
-      alert("Redirecting to membership information page");
+// View toggle functionality
+function setupViewToggle() {
+  if (!gridButton || !listButton) {
+    console.warn('View toggle buttons not found');
+    return;
+  }
+
+  gridButton.addEventListener("click", () => {
+    if (membersContainer) {
+      membersContainer.className = "grid";
+      gridButton.classList.add("active");
+      listButton.classList.remove("active");
     }
   });
-});
 
-// Hero Button Functionality
-const heroButton = document.querySelector(".hero button");
-if (heroButton) {
-  heroButton.addEventListener("click", () => {
-    window.location.href = "#events";
+  listButton.addEventListener("click", () => {
+    if (membersContainer) {
+      membersContainer.className = "list";
+      listButton.classList.add("active");
+      gridButton.classList.remove("active");
+    }
   });
+
+  // Set initial active state
+  gridButton.classList.add("active");
 }
 
-// Simple Weather Data Update (in a real implementation, this would fetch from an API)
-function updateWeather() {
-  // This is a placeholder for actual weather API integration
-  console.log("Weather data would be updated here");
+// Update last modified date
+function updateLastModified() {
+  const lastModified = document.getElementById("last-modified");
+  if (lastModified) {
+    lastModified.textContent = "Last Modification: " + document.lastModified;
+  }
 }
 
-// Initialize
-updateWeather();
+// Initialize directory page
+function initializeDirectory() {
+  try {
+    getMemberData();
+    setupViewToggle();
+    updateLastModified();
+  } catch (error) {
+    console.error('Error initializing directory:', error);
+  }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", initializeDirectory);

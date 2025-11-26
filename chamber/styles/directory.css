@@ -1,440 +1,279 @@
-/* CORRECTED AND UPDATED CSS */
+/* Directory Page Styles */
 
-/* --- Global Styles --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Main content */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
 }
 
-body {
-    font-family: 'Poppins', Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    line-height: 1.6;
-}
-
-/* --- Site Map Navigation (Desktop Only) --- */
-.site-map {
-    background-color: #e8e8e8;
-    padding: 20px;
-    border-bottom: 2px solid #ccc;
-}
-
-.site-map h2 {
-    font-size: 14px;
+main h1 {
+    font-size: 28px;
     margin-bottom: 15px;
-    color: #333;
-}
-
-.site-map nav {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.site-map nav a {
-    padding: 10px 20px;
-    background-color: white;
-    border: 1px solid #ccc;
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-}
-
-.site-map nav a:hover {
-    background-color: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* --- Header --- */
-header {
-    background-color: #f0f0f0;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-    position: relative;
-    /* Essential for mobile menu positioning */
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-}
-
-.logo img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-
-.main-nav a {
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.3s;
-    margin-left: 20px;
-    /* Added spacing for desktop navigation */
-}
-
-.main-nav a:hover {
-    color: #2e7d32;
-}
-
-.theme-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    margin-left: 10px;
-}
-
-/* --- Hero Section --- */
-.hero {
-    padding: 80px 30px;
+    color: var(--primary-color);
     text-align: center;
-    position: relative;
-    min-height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('https://via.placeholder.com/1200x400');
-    background-size: cover;
-    background-position: center;
-    color: white;
 }
 
-/* --- Directory View Buttons (Assuming class "menu" or similar container for them) --- */
+.directory-intro {
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: var(--text-light);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* View toggle menu */
 .menu {
     text-align: center;
     padding: 20px;
-    background-color: #e8e8e8;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-/* --- Directory Grid View (Default) --- */
-#members-container.grid {
-    display: grid;
-    /* auto-fit for responsive column count */
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 10px 20px;
-    max-width: 1200px;
-    /* Optional: Constrain max width for better centering */
-    margin: 0 auto;
-}
-
-#members-container.grid .member-card {
-    border: 1px solid #ccc;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-#members-container.grid .member-card img {
-    max-width: 150px;
-    margin-bottom: 10px;
-}
-
-/* --- Directory List View --- */
-#members-container.list {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-#members-container.list .member-card {
-    display: grid;
-    /* Columns for desktop list view */
-    grid-template-columns: 200px 1fr 120px 150px 100px;
-    gap: 10px;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    align-items: center;
-    text-align: left;
-}
-
-#members-container.list .member-card img {
-    display: none;
-    /* Hidden in list view */
-}
-
-#members-container.list .member-card h3 {
-    font-size: 1.1em;
-    font-weight: bold;
-}
-
-/* --- Call to Action & Banner Styles --- */
-.membership-banner {
-    background-color: #2e7d32;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    margin-bottom: 20px;
-    border-radius: 8px;
-}
-
-.membership-banner a {
-    color: white;
-    text-decoration: underline;
-    font-weight: bold;
-}
-
-.cta-section {
-    background-color: #f0f0f0;
-    padding: 30px;
-    text-align: center;
-    margin: 30px 0;
-    border-radius: 8px;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.cta-button {
-    padding: 12px 25px;
-    background-color: #2e7d32;
-    color: white;
+.menu button {
+    background-color: var(--primary-color);
+    color: var(--white);
     border: none;
+    padding: 12px 24px;
+    margin: 0 10px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.3s;
+    transition: var(--transition);
+    font-size: 14px;
 }
 
-.cta-button:hover {
-    background-color: #1b5e20;
+.menu button:hover,
+.menu button.active {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
 }
 
-.cta-button.secondary {
-    background-color: #666;
+.menu button i {
+    margin-right: 8px;
 }
 
-.cta-button.secondary:hover {
-    background-color: #555;
-}
-
-/* Mobile Menu Button - Hidden by default on desktop */
-.mobile-menu-btn {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    padding: 5px 10px;
-    color: #333;
-    z-index: 100;
-}
-
-/* Footer */
-footer {
-    background-color: #e8e8e8;
-    padding: 30px;
+/* Grid view */
+#members-container.grid {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 30px;
-    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0;
 }
 
-.footer-info h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: #2e7d32;
+#members-container.grid .member-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
 }
 
-.footer-info p {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #666;
+#members-container.grid .member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
 }
 
-.social-links {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
+#members-container.grid .member-image {
+    margin-bottom: 15px;
 }
 
-.social-links a {
-    width: 40px;
-    height: 40px;
-    background-color: #2e7d32;
+#members-container.grid .member-image img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
     border-radius: 50%;
+    border: 3px solid var(--border-color);
+}
+
+/* List view */
+#members-container.list {
     display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0;
+}
+
+#members-container.list .member-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
     align-items: center;
-    justify-content: center;
-    color: white;
-    text-decoration: none;
-    transition: background-color 0.3s;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
 }
 
-.social-links a:hover {
-    background-color: #1b5e20;
+#members-container.list .member-card:hover {
+    box-shadow: var(--shadow-hover);
 }
 
-.footer-projects {
-    text-align: right;
+#members-container.list .member-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
 }
 
-.footer-projects h4 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: #2e7d32;
+/* Member card content */
+.member-info h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--primary-color);
 }
 
-.footer-projects p {
+.membership-level {
     font-size: 12px;
-    line-height: 1.6;
-    color: #666;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: inline-block;
 }
 
-/* (Footer styles remain mostly the same for desktop) */
+.level-1 {
+    background-color: #cd7f32;
+    color: var(--white);
+}
 
-/* ---------------------------------------------------------------------- */
-/* 📱 Mobile Corrections and Updates (max-width: 768px) */
-/* ---------------------------------------------------------------------- */
+.level-2 {
+    background-color: #c0c0c0;
+    color: #333;
+}
 
+.level-3 {
+    background-color: #ffd700;
+    color: #333;
+}
+
+.member-address,
+.member-phone,
+.member-website {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.member-address i,
+.member-phone i,
+.member-website i {
+    width: 16px;
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.member-website a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.member-website a:hover {
+    text-decoration: underline;
+}
+
+.member-info-text {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Error and no data messages */
+.error-message,
+.no-data-message {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    grid-column: 1 / -1;
+}
+
+.error-message h2,
+.no-data-message h2 {
+    color: #dc3545;
+    margin-bottom: 15px;
+}
+
+.error-message p,
+.no-data-message p {
+    color: var(--text-light);
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
-
-    /* --- General Mobile Reset --- */
-    /* REMOVED: .mobile-container, .mobile-frame, .mobile-screen, .phone-notch */
-    /* These specific styles were likely restricting the content viewport */
-    body {
-        /* Reset any heavy padding or restrictive background color */
-        padding: 0;
-        background-color: #f5f5f5;
-    }
-
-    .site-map {
-        display: none;
-        /* Correctly hidden */
-    }
-
-    /* --- Header & Navigation --- */
-    header {
-        /* Adjusted padding and layout for better mobile fit */
-        padding: 15px;
-        flex-wrap: wrap;
-    }
-
-    .logo {
-        margin-bottom: 0;
-    }
-
-    /* Show mobile menu button */
-    .mobile-menu-btn {
-        display: block;
-        position: absolute;
-        top: 10px;
-        /* Adjusted position */
-        right: 10px;
-        /* Adjusted position */
-    }
-
-    /* Hide desktop navigation */
-    .main-nav {
-        display: none;
-    }
-
-    /* When menu is active, show vertical navigation */
-    .main-nav.active {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 60px;
-        right: 10px;
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        gap: 10px;
-        z-index: 99;
-        /* Ensure it doesn't break out of the screen */
-        min-width: 150px;
-        text-align: left;
-    }
-
-    .main-nav.active a {
-        display: block;
-        padding: 5px;
-    }
-
-    /* --- Directory Content Correction (The Fix!) --- */
-    #members-container {
-        padding: 10px;
-        /* Use smaller padding on mobile */
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* List View Stacked (from @media 600px, now combined here) */
-    #members-container.list .member-card {
-        grid-template-columns: 1fr;
-        /* Stack items vertically */
-        text-align: center;
-        padding: 15px 10px;
-    }
-
-    /* Added back images for list view on mobile since all content is stacked */
-    #members-container.list .member-card img {
-        display: block;
-        max-width: 100px;
-        margin: 10px auto;
-    }
-
-    /* --- Footer Mobile --- */
-    footer {
-        grid-template-columns: 1fr;
-        padding: 20px;
-        gap: 20px;
-        text-align: center;
-    }
-
-    .footer-projects {
-        text-align: center;
-    }
-
-    /* Consolidated other mobile rules for cleanliness */
-    .hero {
-        padding: 40px 15px;
-        min-height: 150px;
-    }
-
-    .content-wrapper {
+    main {
         padding: 15px;
     }
 
-    .content-wrapper>h2 {
-        font-size: 18px;
+    main h1 {
+        font-size: 24px;
     }
 
-    .business-cards {
+    .directory-intro {
+        font-size: 14px;
+    }
+
+    .menu {
+        padding: 15px;
+    }
+
+    .menu button {
+        padding: 10px 16px;
+        margin: 5px;
+        font-size: 13px;
+    }
+
+    #members-container.grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
+
+    #members-container.list .member-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 15px;
+    }
+
+    #members-container.list .member-image {
+        justify-self: center;
+    }
+
+    .member-info h3 {
+        font-size: 16px;
+    }
 }
 
-/* REMOVED @media (max-width: 375px) block for redundancy and complexity, as 768px should handle all smaller devices. */
-
-/* --- Dark Mode (Styles remain the same) --- */
-body.dark-mode {
-    background-color: #121212;
-    color: #e0e0e0;
+/* Dark mode styles */
+body.dark-mode .member-card {
+    background-color: var(--white);
+    border-color: var(--border-color);
+    color: var(--text-color);
 }
 
-/* ... rest of dark mode styles ... */
+body.dark-mode .member-info h3 {
+    color: var(--secondary-color);
+}
+
+body.dark-mode .member-address i,
+body.dark-mode .member-phone i,
+body.dark-mode .member-website i {
+    color: var(--secondary-color);
+}
+
+body.dark-mode .member-website a {
+    color: var(--secondary-color);
+}
+
+body.dark-mode .error-message,
+body.dark-mode .no-data-message {
+    background-color: var(--white);
+    color: var(--text-color);
+}

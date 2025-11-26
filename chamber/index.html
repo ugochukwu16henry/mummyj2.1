@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>UYO Chamber of Commerce</title>
     <meta name="description"
-        content="Uyo Chamber of Commerce — resources, events, directory and networking for local businesses." />
+        content="Uyo Chamber of Commerce - resources, events, directory and networking for local businesses." />
     <meta name="theme-color" content="#1E3A8A" />
 
     <!-- SEO & Social -->
@@ -37,6 +37,9 @@
 </head>
 
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <!-- Header -->
     <header>
         <div class="logo">
@@ -62,13 +65,13 @@
     <!-- Hero Section -->
     <section class="hero" id="hero">
         <div class="hero-slides">
-            <div class="hero-slide active" style="background-image: url('images/hero1.jpg');">
+            <div class="hero-slide active" style="background-image: url('images/hero1.jpg');" role="img" aria-label="Uyo business district">
                 <div class="hero-overlay"></div>
             </div>
-            <div class="hero-slide" style="background-image: url('images/hero2.jpg');">
+            <div class="hero-slide" style="background-image: url('images/hero2.jpg');" role="img" aria-label="Chamber networking event">
                 <div class="hero-overlay"></div>
             </div>
-            <div class="hero-slide" style="background-image: url('images/hero3.jpg');">
+            <div class="hero-slide" style="background-image: url('images/hero3.jpg');" role="img" aria-label="Local business showcase">
                 <div class="hero-overlay"></div>
             </div>
         </div>
@@ -76,7 +79,7 @@
             <h1>Welcome to UYO Chamber of Commerce</h1>
             <p>Connecting businesses, fostering growth, and building our community together</p>
         </div>
-        <button>Upcoming Events</button>
+        <button type="button" aria-label="View upcoming events">Upcoming Events</button>
 
         <!-- Navigation Dots -->
         <div class="hero-dots">
@@ -87,7 +90,7 @@
     </section>
 
     <!-- Main Content -->
-    <main class="content-wrapper">
+    <main id="main-content" class="content-wrapper" role="main">
         <h2>Home</h2>
 
         <!-- Content Grid -->
@@ -142,8 +145,8 @@
             <p>Join the UYO Chamber of Commerce and access resources, networking opportunities, and business
                 support.</p>
             <div class="cta-buttons">
-                <button class="cta-button">Become a Member</button>
-                <button class="cta-button secondary">Learn More</button>
+                <button type="button" class="cta-button" aria-label="Join as a member">Become a Member</button>
+                <button type="button" class="cta-button secondary" aria-label="Learn more about membership">Learn More</button>
             </div>
         </section>
 

@@ -186,6 +186,9 @@
 </head>
 
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <!-- Header -->
     <header>
         <div class="logo">
@@ -196,13 +199,13 @@
             <a href="index.html">Home</a>
             <a href="directory.html">Directory</a>
             <a href="join.html">Join</a>
-            <a href="#discover">Discover</a>
-            <button class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+            <a href="discover.html">Discover</a>
+            <button type="button" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
         </nav>
-        <button class="mobile-menu-btn" aria-label="Toggle mobile menu">☰</button>
+        <button type="button" class="mobile-menu-btn" aria-label="Toggle mobile menu">☰</button>
     </header>
 
-    <main>
+    <main id="main-content" role="main">
         <div class="thankyou-container">
             <div class="thankyou-card">
                 <div class="success-icon">
@@ -231,7 +234,7 @@
                 </div>
 
                 <a href="index.html" class="back-home-btn">
-                    <i class="fas fa-home"></i> Return to Home
+                    <i class="fas fa-home" aria-hidden="true"></i> Return to Home
                 </a>
             </div>
         </div>
@@ -251,16 +254,16 @@
 
         <div class="social-links">
             <a href="#instagram" aria-label="Instagram">
-                <i class="fab fa-instagram"></i>
+                <i class="fab fa-instagram" aria-hidden="true"></i>
             </a>
             <a href="#twitter" aria-label="Twitter">
-                <i class="fab fa-twitter"></i>
+                <i class="fab fa-twitter" aria-hidden="true"></i>
             </a>
             <a href="#linkedin" aria-label="LinkedIn">
-                <i class="fab fa-linkedin-in"></i>
+                <i class="fab fa-linkedin-in" aria-hidden="true"></i>
             </a>
             <a href="#facebook" aria-label="Facebook">
-                <i class="fab fa-facebook-f"></i>
+                <i class="fab fa-facebook-f" aria-hidden="true"></i>
             </a>
         </div>
 
