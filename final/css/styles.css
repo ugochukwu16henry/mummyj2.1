@@ -114,7 +114,8 @@ h1,
 h2,
 h3 {
     font-family: 'Playfair Display', serif;
-    color: var(--primary);
+    color: #C65D48;
+    font-weight: 700;
 }
 
 h1 {
@@ -202,7 +203,7 @@ h2 {
 
 .card h3 {
     margin: 1rem 0 0.5rem;
-    color: var(--primary);
+    color: #C65D48;
     font-weight: 700;
 }
 
@@ -222,7 +223,7 @@ h2 {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     align-items: center;
     justify-content: center;
     z-index: 2000;
@@ -230,6 +231,7 @@ h2 {
 
 .modal-content {
     background: #fff;
+    color: var(--dark);
     padding: 2rem;
     border-radius: 12px;
     max-width: 90%;
@@ -353,7 +355,7 @@ img {
 }
 
 .visitor-counter strong {
-    color: var(--primary);
+    color: #C65D48;
     font-weight: 700;
 }
 
@@ -386,7 +388,7 @@ img {
 }
 
 .business-info strong {
-    color: var(--primary);
+    color: #C65D48;
     font-weight: 700;
 }
 
@@ -412,7 +414,7 @@ img {
 }
 
 .required {
-    color: var(--primary);
+    color: #C65D48;
 }
 
 input:focus,
@@ -491,11 +493,12 @@ select:invalid:not(:placeholder-shown) {
     position: absolute;
     top: -40px;
     left: 0;
-    background: var(--primary);
+    background: #C65D48;
     color: #fff;
     padding: 8px;
     text-decoration: none;
     z-index: 100;
+    font-weight: 600;
 }
 
 .skip-link:focus {
