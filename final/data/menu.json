@@ -14,5 +14,5 @@
   {"id":13,"name":"Chapman Cocktail","category":"Drinks","price":"₦1,500","desc":"Non-alcoholic classic","img":"images/chapman.jpg"},
   {"id":14,"name":"Jollof Rice Plate","category":"Meals","price":"₦1,800","desc":"With chicken & plantain","img":"images/jollof.jpg"},
   {"id":15,"name":"Egusi Soup + Pounded Yam","category":"Meals","price":"₦2,500","desc":"Traditional delicacy","img":"images/egusi.jpg"},
-  {"id":16,"name":"Wedding Package (50 guests)","category":"Events","price":"₦350,000","desc":"Cake + small chops + drinks","img":"images/wedding.jpg"}
+  {"id":16,"name":"Wedding Package (50 guests)","category":"Events","price":"₦150,000","desc":"Cake + small chops + drinks","img":"images/wedding.jpg"}
 ]
