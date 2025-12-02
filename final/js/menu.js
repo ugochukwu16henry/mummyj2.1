@@ -12,6 +12,7 @@ export async function loadMenu(container) {
   container.innerHTML = '<p class="loading">Loading menu...</p>';
 
   try {
+<<<<<<< HEAD
     // Fetch JSON file - try multiple path formats for maximum compatibility
     const currentPath = window.location.pathname;
     const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
@@ -52,6 +53,26 @@ export async function loadMenu(container) {
       console.error("- Base path:", basePath);
       console.error("- Tried paths:", pathsToTry);
       if (lastError) console.error("- Last error:", lastError);
+=======
+    // Fetch JSON file - handle GitHub Pages path resolution
+    // Get the directory of the current HTML file
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+    const jsonPath = `${basePath}data/Menu.json`;
+    
+    const res = await fetch(jsonPath);
+    
+    if (!res.ok) {
+      const errorMsg = `Failed to load menu: ${res.status} ${res.statusText}`;
+      const resolvedUrl = new URL(jsonPath, window.location.origin).href;
+      console.error("Fetch Error Details:");
+      console.error("- Current URL:", window.location.href);
+      console.error("- Current path:", currentPath);
+      console.error("- Base path:", basePath);
+      console.error("- Attempted path:", jsonPath);
+      console.error("- Full resolved URL:", resolvedUrl);
+      console.error("- Response status:", res.status, res.statusText);
+>>>>>>> f98631acaeeb23d617261906deaacb3de2c0c9b9
       throw new Error(errorMsg);
     }
     
