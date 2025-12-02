@@ -12,16 +12,23 @@ export async function loadMenu(container) {
   container.innerHTML = '<p class="loading">Loading menu...</p>';
 
   try {
-    // Fetch JSON file - path is relative to the HTML document's location
-    // When menu.html is at /menu.html, data/Menu.json resolves to /data/Menu.json
-    const res = await fetch("data/Menu.json");
+    // Fetch JSON file - handle GitHub Pages path resolution
+    // Get the directory of the current HTML file
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+    const jsonPath = `${basePath}data/Menu.json`;
+    
+    const res = await fetch(jsonPath);
     
     if (!res.ok) {
       const errorMsg = `Failed to load menu: ${res.status} ${res.statusText}`;
+      const resolvedUrl = new URL(jsonPath, window.location.origin).href;
       console.error("Fetch Error Details:");
       console.error("- Current URL:", window.location.href);
-      console.error("- Attempted path: data/Menu.json");
-      console.error("- Full resolved URL:", new URL("data/Menu.json", window.location.href).href);
+      console.error("- Current path:", currentPath);
+      console.error("- Base path:", basePath);
+      console.error("- Attempted path:", jsonPath);
+      console.error("- Full resolved URL:", resolvedUrl);
       console.error("- Response status:", res.status, res.statusText);
       throw new Error(errorMsg);
     }
