@@ -1,6 +1,6 @@
 // main.js – ES Module
 import { loadMenu } from "./menu.js";
-import { initModal, openModal, closeModal } from "./modal.js";
+import { openModal, closeModal } from "./modal.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Hamburger menu

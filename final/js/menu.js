@@ -1,7 +1,9 @@
 // menu.js
+import { openModal } from "./modal.js";
+
 export async function loadMenu(container) {
   try {
-    const res = await fetch("../data/menu.json");
+    const res = await fetch("../data/Menu.json");
     if (!res.ok) throw new Error("Menu data not found");
     const items = await res.json();
 
