@@ -1,5 +1,5 @@
 [
-  {"id":1,"name":"Chocolate Fudge Cake","category":"Cakes","price":"₦18,000","desc":"Rich chocolate layers with ganache","img":"images/cake1.jpg"},
+  {"id":1,"name":"Chocolate Fudge Cake","category":"Cakes","price":"₦18,000","desc":"Rich chocolate layers with ganache","img":"images/cake1.png"},
   {"id":2,"name":"Red Velvet Cake","category":"Cakes","price":"₦20,000","desc":"Classic cream cheese frosting","img":"images/cake2.jpg"},
   {"id":3,"name":"Vanilla Berry Cake","category":"Cakes","price":"₦17,000","desc":"Fresh berries & vanilla sponge","img":"images/cake3.jpg"},
   {"id":4,"name":"Meat Pie (pack of 6)","category":"Pastries","price":"₦3,000","desc":"Flaky pastry with spiced beef","img":"images/meatpie.jpg"},
