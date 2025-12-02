@@ -12,10 +12,17 @@ export async function loadMenu(container) {
   container.innerHTML = '<p class="loading">Loading menu...</p>';
 
   try {
-    const res = await fetch("data/Menu.json");
+    // Fetch JSON file - path is relative to the HTML document
+    // HTML files are in final/, JSON is in final/data/Menu.json
+    const res = await fetch("./data/Menu.json");
     
     if (!res.ok) {
-      throw new Error(`Failed to load menu: ${res.status} ${res.statusText}`);
+      // Provide helpful error message with debugging info
+      const errorMsg = `Failed to load menu: ${res.status} ${res.statusText}`;
+      console.error(errorMsg);
+      console.error("Current location:", window.location.href);
+      console.error("Attempted path: ./data/Menu.json");
+      throw new Error(errorMsg);
     }
     
     const items = await res.json();
