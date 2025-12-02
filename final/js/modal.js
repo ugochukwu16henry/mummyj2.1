@@ -33,6 +33,7 @@ export function openModal(id, dataArray) {
 
   // Show modal with proper ARIA attributes
   modal.setAttribute("aria-hidden", "false");
+  modal.setAttribute("aria-labelledby", "modal-title");
   modal.style.display = "flex";
   
   // Focus management for accessibility
@@ -49,6 +50,7 @@ export function closeModal() {
   if (!modal) return;
   
   modal.setAttribute("aria-hidden", "true");
+  modal.removeAttribute("aria-labelledby");
   modal.style.display = "none";
   
   // Restore body scroll
