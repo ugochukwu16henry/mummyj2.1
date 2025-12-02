@@ -469,6 +469,25 @@ select:invalid:not(:placeholder-shown) {
     color: var(--primary);
 }
 
+/* Thank you page */
+.thank-you-page {
+    text-align: center;
+    padding: 6rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.thank-you-page h1 {
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.thank-you-page p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: var(--dark);
+}
+
 /* Responsive improvements */
 @media (max-width: 768px) {
     h1 {
@@ -486,5 +505,9 @@ select:invalid:not(:placeholder-shown) {
     .modal-content {
         max-width: 95%;
         padding: 1.5rem;
+    }
+
+    .thank-you-page {
+        padding: 4rem 1rem;
     }
 }
