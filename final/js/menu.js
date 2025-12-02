@@ -18,45 +18,58 @@ export async function loadMenu(container) {
     const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
     
     // Try different path formats for maximum compatibility
+    // Include both uppercase and lowercase versions for case-sensitive servers
     const pathsToTry = [
-      basePath + 'data/Menu.json',           // Relative to current directory
-      '/wdd231/final/data/Menu.json',        // Absolute from repo root (GitHub Pages)
-      './data/Menu.json',                    // Simple relative
-      'data/Menu.json'                       // Relative without ./
+      basePath + 'data/Menu.json',           // Relative to current directory (uppercase)
+      basePath + 'data/menu.json',           // Relative to current directory (lowercase - case fallback)
+      '/wdd231/final/data/Menu.json',        // Absolute from repo root (GitHub Pages - uppercase)
+      '/wdd231/final/data/menu.json',        // Absolute from repo root (GitHub Pages - lowercase)
+      './data/Menu.json',                    // Simple relative (uppercase)
+      './data/menu.json',                    // Simple relative (lowercase)
+      'data/Menu.json',                      // Relative without ./ (uppercase)
+      'data/menu.json'                       // Relative without ./ (lowercase)
     ];
     
     let res;
     let lastError;
     let successfulPath = null;
+    const attemptedUrls = [];
     
     for (const path of pathsToTry) {
       try {
         const fullUrl = path.startsWith('http') ? path : new URL(path, window.location.origin).href;
+        attemptedUrls.push(fullUrl);
         console.log(`Trying path: ${path} -> ${fullUrl}`);
         res = await fetch(fullUrl);
         
         if (res.ok) {
           successfulPath = fullUrl;
-          console.log(`Successfully loaded menu from: ${successfulPath}`);
+          console.log(`✅ Successfully loaded menu from: ${successfulPath}`);
           break;
         } else {
-          console.warn(`Path failed with status ${res.status}: ${fullUrl}`);
+          console.warn(`❌ Path failed with status ${res.status}: ${fullUrl}`);
         }
       } catch (err) {
         lastError = err;
-        console.warn(`Path error: ${path}`, err);
+        console.warn(`⚠️ Path error: ${path}`, err);
         continue;
       }
     }
     
     if (!res || !res.ok) {
       const errorMsg = `Failed to load menu: ${res ? res.status + ' ' + res.statusText : 'All paths failed'}`;
-      console.error("Fetch Error Details:");
+      console.error("❌ Fetch Error Details:");
       console.error("- Current URL:", window.location.href);
       console.error("- Current pathname:", currentPath);
       console.error("- Base path:", basePath);
+      console.error("- All attempted URLs:", attemptedUrls);
       console.error("- Tried paths:", pathsToTry);
       if (lastError) console.error("- Last error:", lastError);
+      console.error("\n💡 Troubleshooting:");
+      console.error("1. Verify Menu.json exists at: https://github.com/ugochukwu16henry/wdd231/tree/main/final/data");
+      console.error("2. Check file name case (Menu.json vs menu.json)");
+      console.error("3. Ensure file is committed and pushed to GitHub");
+      console.error("4. Wait a few minutes for GitHub Pages to rebuild after pushing");
       throw new Error(errorMsg);
     }
     
