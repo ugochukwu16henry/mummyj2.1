@@ -22,6 +22,7 @@ const AUTH_CONFIG_PATH = path.resolve(__dirname, "../data/admin-auth.json");
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "12mb" }));
 
 function sanitizeCatalog(data) {
   if (!data || typeof data !== "object") {

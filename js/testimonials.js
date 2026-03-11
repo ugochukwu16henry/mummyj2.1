@@ -181,8 +181,13 @@ function setupTestimonialForm() {
       });
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || "Could not submit testimony");
+        const payload = await response.json().catch(() => null);
+        const fallbackText = await response.text().catch(() => "");
+        throw new Error(
+          payload?.error
+            || fallbackText
+            || `Could not submit testimony (HTTP ${response.status})`
+        );
       }
 
       form.reset();
