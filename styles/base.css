@@ -450,6 +450,12 @@ img {
     color: #c65d48;
 }
 
+.story-hint {
+    margin: 0 0 0.6rem;
+    font-size: 0.84rem;
+    color: rgba(45, 49, 66, 0.8);
+}
+
 .story-step textarea {
     min-height: 140px;
     resize: none;
