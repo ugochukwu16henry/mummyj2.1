@@ -92,6 +92,16 @@ function normalizeProducts(rawPayload) {
   });
 }
 
+function getUpsellStatusBadge(item) {
+  if (item.outOfStock) {
+    return '<p class="upsell-stock-badge out" aria-label="Out of stock">Out of Stock</p>';
+  }
+  if (item.lowStock) {
+    return '<p class="upsell-stock-badge low" aria-label="Low stock">Low Stock</p>';
+  }
+  return '<p class="upsell-stock-badge in" aria-label="In stock">In Stock</p>';
+}
+
 function showToast(message, withUndo = false, onUndo = null) {
   if (!toast) {
     return;
@@ -367,10 +377,30 @@ function attachCartEvents() {
 }
 
 async function loadMenuData() {
-  const response = await fetch("data/catalog.json");
-  if (!response.ok) {
+  const candidatePaths = [
+    "data/catalog.json",
+    "./data/catalog.json",
+    "data/menu.json",
+    "./data/menu.json"
+  ];
+
+  let response = null;
+  for (const candidate of candidatePaths) {
+    try {
+      const attempt = await fetch(candidate, { cache: "no-store" });
+      if (attempt.ok) {
+        response = attempt;
+        break;
+      }
+    } catch {
+      // try next source
+    }
+  }
+
+  if (!response || !response.ok) {
     throw new Error("Could not load menu data");
   }
+
   const rawPayload = await response.json();
   menuItems = normalizeProducts(rawPayload);
 }
@@ -381,17 +411,31 @@ function renderUpsells() {
   }
 
   const { items } = getCartState();
-  const idsInCart = new Set(items.map((item) => String(item.id)));
+  const idsInCart = new Set(items.map((item) => String(item.product_id || item.id)));
   const suggestions = menuItems
     .filter((item) => !idsInCart.has(String(item.id)) && !item.orderOnly)
+    .sort((a, b) => {
+      if (a.stockRank !== b.stockRank) {
+        return a.stockRank - b.stockRank;
+      }
+
+      const categoryDiff = a.category.localeCompare(b.category);
+      if (categoryDiff !== 0) {
+        return categoryDiff;
+      }
+
+      return a.name.localeCompare(b.name);
+    })
     .slice(0, 8);
 
   upsellList.innerHTML = suggestions.map((item) => `
     <article class="upsell-card">
       <img src="${item.img}" alt="${item.name}">
+      ${getUpsellStatusBadge(item)}
       <h4>${item.name}</h4>
+      <p class="cart-meta">${item.category}</p>
       <p>${item.price}</p>
-      <button type="button" class="btn btn-primary" data-upsell="${item.id}">Quick Add</button>
+      <button type="button" class="btn btn-primary" data-upsell="${item.id}" ${item.outOfStock ? "disabled" : ""}>${item.outOfStock ? "Unavailable" : "Quick Add"}</button>
     </article>
   `).join("");
 }
