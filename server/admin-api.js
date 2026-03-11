@@ -4,7 +4,6 @@ import express from "express";
 import fs from "node:fs/promises";
 import path from "node:path";
 import jwt from "jsonwebtoken";
-import { createPresignedUpload } from "../api/_upload-utils.js";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -513,43 +512,6 @@ app.post("/api/admin/posts", authMiddleware, async (req, res) => {
   await writeContent(content);
 
   res.status(201).json({ ok: true, post });
-});
-
-app.delete("/api/admin/posts/:id", authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const content = await readContent();
-  const next = content.posts.filter((post) => post.id !== id);
-  if (next.length === content.posts.length) {
-    return res.status(404).json({ error: "Post not found" });
-  }
-  content.posts = next;
-  await writeContent(content);
-  res.json({ ok: true });
-});
-
-app.post("/api/uploads/presign", authMiddleware, async (req, res) => {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  try {
-    const { fileName, fileType, folder } = req.body || {};
-
-    if (!fileName) {
-      return res.status(400).json({ error: "fileName is required" });
-    }
-
-    const payload = await createPresignedUpload({
-      fileName,
-      fileType,
-      folder: folder || "blog"
-    });
-
-    return res.status(200).json(payload);
-  } catch (error) {
-    return res.status(500).json({ error: error.message || "Could not create upload URL" });
-  }
 });
 
 app.delete("/api/admin/posts/:id", authMiddleware, async (req, res) => {
