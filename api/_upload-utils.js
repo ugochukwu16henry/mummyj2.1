@@ -1,14 +1,19 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config as loadEnv } from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function readS3Config() {
   return {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "",
-    region: process.env.S3_REGION || "us-east-1",
-    bucketName: process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || "",
-    endpoint: process.env.S3_ENDPOINT || "",
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY || "",
+    region: process.env.S3_REGION || process.env.AWS_REGION || process.env.REGION || "us-east-1",
+    bucketName: process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || process.env.BUCKET || "",
+    endpoint: process.env.S3_ENDPOINT || process.env.ENDPOINT_URL || "",
     publicBaseUrl: process.env.S3_PUBLIC_BASE_URL || "",
     forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || "true").toLowerCase() !== "false"
   };
@@ -18,7 +23,8 @@ function ensureS3Config() {
   let cfg = readS3Config();
 
   if (!cfg.accessKeyId || !cfg.secretAccessKey || !cfg.bucketName) {
-    loadEnv();
+    loadEnv({ path: path.resolve(process.cwd(), ".env") });
+    loadEnv({ path: path.resolve(__dirname, "../.env") });
     cfg = readS3Config();
   }
 

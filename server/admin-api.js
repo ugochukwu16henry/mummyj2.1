@@ -22,13 +22,17 @@ const __dirname = path.dirname(__filename);
 const CATALOG_PATH = path.resolve(__dirname, "../data/catalog.json");
 const CONTENT_PATH = path.resolve(__dirname, "../data/content.json");
 const AUTH_CONFIG_PATH = path.resolve(__dirname, "../data/admin-auth.json");
-const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "";
-const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "";
-const S3_REGION = process.env.S3_REGION || "us-east-1";
-const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || "";
-const S3_ENDPOINT = process.env.S3_ENDPOINT || "";
-const S3_PUBLIC_BASE_URL = process.env.S3_PUBLIC_BASE_URL || "";
-const S3_FORCE_PATH_STYLE = String(process.env.S3_FORCE_PATH_STYLE || "true").toLowerCase() !== "false";
+function readS3Config() {
+  return {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY || "",
+    region: process.env.S3_REGION || process.env.AWS_REGION || process.env.REGION || "us-east-1",
+    bucketName: process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || process.env.BUCKET || "",
+    endpoint: process.env.S3_ENDPOINT || process.env.ENDPOINT_URL || "",
+    publicBaseUrl: process.env.S3_PUBLIC_BASE_URL || "",
+    forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || "true").toLowerCase() !== "false"
+  };
+}
 
 app.use(cors());
 app.use(express.json({ limit: "30mb" }));
@@ -243,33 +247,34 @@ async function writeAdminAuth(nextAuth) {
 }
 
 function ensureS3Config() {
-  if (!S3_ACCESS_KEY_ID || !S3_SECRET_ACCESS_KEY || !S3_BUCKET_NAME) {
-    loadEnv();
+  let cfg = readS3Config();
+
+  if (!cfg.accessKeyId || !cfg.secretAccessKey || !cfg.bucketName) {
+    loadEnv({ path: path.resolve(process.cwd(), ".env") });
+    cfg = readS3Config();
   }
 
-  const accessKey = process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || S3_ACCESS_KEY_ID;
-  const secretKey = process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || S3_SECRET_ACCESS_KEY;
-  const bucket = process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || S3_BUCKET_NAME;
-
   const missing = [];
-  if (!accessKey) missing.push("S3_ACCESS_KEY_ID/AWS_ACCESS_KEY_ID");
-  if (!secretKey) missing.push("S3_SECRET_ACCESS_KEY/AWS_SECRET_ACCESS_KEY");
-  if (!bucket) missing.push("S3_BUCKET_NAME/AWS_BUCKET_NAME/BUCKET_NAME");
+  if (!cfg.accessKeyId) missing.push("S3_ACCESS_KEY_ID/AWS_ACCESS_KEY_ID/ACCESS_KEY_ID");
+  if (!cfg.secretAccessKey) missing.push("S3_SECRET_ACCESS_KEY/AWS_SECRET_ACCESS_KEY/SECRET_ACCESS_KEY");
+  if (!cfg.bucketName) missing.push("S3_BUCKET_NAME/AWS_BUCKET_NAME/BUCKET_NAME/BUCKET");
 
   if (missing.length) {
     throw new Error(`S3 is not configured. Missing: ${missing.join(", ")}`);
   }
+
+  return cfg;
 }
 
 function getS3Client() {
-  ensureS3Config();
+  const cfg = ensureS3Config();
   return new S3Client({
-    region: S3_REGION,
-    endpoint: S3_ENDPOINT || undefined,
-    forcePathStyle: S3_FORCE_PATH_STYLE,
+    region: cfg.region,
+    endpoint: cfg.endpoint || undefined,
+    forcePathStyle: cfg.forcePathStyle,
     credentials: {
-      accessKeyId: S3_ACCESS_KEY_ID,
-      secretAccessKey: S3_SECRET_ACCESS_KEY
+      accessKeyId: cfg.accessKeyId,
+      secretAccessKey: cfg.secretAccessKey
     }
   });
 }
@@ -291,26 +296,28 @@ function encodeKey(key) {
 }
 
 function buildPublicFileUrl(key) {
+  const cfg = ensureS3Config();
   const encodedKey = encodeKey(key);
 
-  if (S3_PUBLIC_BASE_URL) {
-    return `${S3_PUBLIC_BASE_URL.replace(/\/$/, "")}/${encodedKey}`;
+  if (cfg.publicBaseUrl) {
+    return `${cfg.publicBaseUrl.replace(/\/$/, "")}/${encodedKey}`;
   }
 
-  if (S3_ENDPOINT) {
-    return `${S3_ENDPOINT.replace(/\/$/, "")}/${S3_BUCKET_NAME}/${encodedKey}`;
+  if (cfg.endpoint) {
+    return `${cfg.endpoint.replace(/\/$/, "")}/${cfg.bucketName}/${encodedKey}`;
   }
 
-  return `https://${S3_BUCKET_NAME}.s3.${S3_REGION}.amazonaws.com/${encodedKey}`;
+  return `https://${cfg.bucketName}.s3.${cfg.region}.amazonaws.com/${encodedKey}`;
 }
 
 async function createPresignedUpload({ fileName, fileType, folder = "testimonials" }) {
+  const cfg = ensureS3Config();
   const client = getS3Client();
   const safeName = safeFilename(fileName);
   const key = `${String(folder).replace(/^\/+|\/+$/g, "")}/${Date.now()}-${safeName}`;
 
   const command = new PutObjectCommand({
-    Bucket: S3_BUCKET_NAME,
+    Bucket: cfg.bucketName,
     Key: key,
     ContentType: fileType || "application/octet-stream"
   });
