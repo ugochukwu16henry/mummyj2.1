@@ -49,16 +49,47 @@ async function compressImageForUpload(file) {
 
   context.drawImage(image, 0, 0, width, height);
 
-  let quality = 0.82;
-  let output = canvas.toDataURL("image/jpeg", quality);
-  const targetBytes = 700 * 1024;
-
-  while (output.length > targetBytes * 1.4 && quality > 0.5) {
-    quality -= 0.08;
-    output = canvas.toDataURL("image/jpeg", quality);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.78));
+  if (blob) {
+    return blob;
   }
 
-  return output;
+  const fallbackDataUrl = canvas.toDataURL("image/jpeg", 0.78);
+  const fallbackResponse = await fetch(fallbackDataUrl);
+  return fallbackResponse.blob();
+}
+
+async function requestUploadUrl(fileName, fileType, folder) {
+  const response = await fetch(`${API_BASE}/uploads/presign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileName, fileType, folder })
+  });
+
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(payload?.error || "Could not prepare file upload");
+  }
+
+  return payload;
+}
+
+async function uploadFileToBucket(fileOrBlob, fileName, fileType, folder) {
+  const signed = await requestUploadUrl(fileName, fileType, folder);
+
+  const uploadResponse = await fetch(signed.uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": fileType || "application/octet-stream"
+    },
+    body: fileOrBlob
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Could not upload media file");
+  }
+
+  return signed.fileUrl;
 }
 
 function validateFileSize(file, maxBytes) {
@@ -348,11 +379,22 @@ function setupTestimonialForm() {
       let videoUrl = "";
 
       if (imageFile) {
-        imageUrl = await compressImageForUpload(imageFile);
+        const imageBlob = await compressImageForUpload(imageFile);
+        imageUrl = await uploadFileToBucket(
+          imageBlob,
+          imageFile.name || `photo-${Date.now()}.jpg`,
+          "image/jpeg",
+          "testimonials/images"
+        );
       }
 
       if (videoFile) {
-        videoUrl = await fileToDataUrl(videoFile);
+        videoUrl = await uploadFileToBucket(
+          videoFile,
+          videoFile.name || `video-${Date.now()}.mp4`,
+          videoFile.type || "video/mp4",
+          "testimonials/videos"
+        );
       }
 
       const response = await fetch(`${API_BASE}/testimonials`, {
