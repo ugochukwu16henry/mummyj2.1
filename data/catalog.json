@@ -164,8 +164,8 @@
       "description": "Veggies and chicken",
       "image": "images/springroll.jpg",
       "last_updated": "2026-03-11",
-      "out_of_stock": true,
-      "order_only": false
+      "out_of_stock": false,
+      "order_only": true
     },
     {
       "id": "p009",
@@ -180,8 +180,8 @@
       "description": "Spicy beef filling",
       "image": "images/samosa.jpg",
       "last_updated": "2026-03-11",
-      "out_of_stock": true,
-      "order_only": false
+      "out_of_stock": false,
+      "order_only": true
     },
     {
       "id": "p010",
