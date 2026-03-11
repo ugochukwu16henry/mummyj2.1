@@ -1,4 +1,6 @@
-const API_BASE = "http://localhost:5050/api";
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:5050/api"
+  : "/api";
 const TOKEN_KEY = "mjt-admin-token";
 const JSON_SCHEMA = [
   { key: "id", label: "ID", type: "text", placeholder: "p017", required: true },
