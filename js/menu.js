@@ -22,16 +22,26 @@ function normalizeCatalogPayload(rawPayload) {
       ? rawPayload.products
       : [];
 
-  return sourceItems.map((item, index) => ({
-    id: item.id ?? `item-${index + 1}`,
-    name: item.name || "Untitled Product",
-    category: item.category || "General",
-    price: formatPrice(item.price),
-    desc: item.desc || item.description || "",
-    img: item.img || item.image || "images/placeholder.png",
-    orderOnly: Boolean(item.order_only),
-    outOfStock: Boolean(item.out_of_stock) || Number(item.stock || 0) <= 0
-  }));
+  return sourceItems.map((item, index) => {
+    const stock = Number(item.stock || 0);
+    const outOfStock = Boolean(item.out_of_stock) || stock <= 0;
+    const lowStock = !outOfStock && stock > 0 && stock <= 10;
+    const stockRank = outOfStock ? 2 : lowStock ? 1 : 0; // 0=in stock, 1=low, 2=out
+
+    return {
+      id: item.id ?? `item-${index + 1}`,
+      name: item.name || "Untitled Product",
+      category: item.category || "General",
+      price: formatPrice(item.price),
+      desc: item.desc || item.description || "",
+      img: item.img || item.image || "images/placeholder.png",
+      orderOnly: Boolean(item.order_only),
+      outOfStock,
+      lowStock,
+      stock,
+      stockRank
+    };
+  });
 }
 
 async function submitOrderRequest(orderPayload) {
@@ -239,7 +249,17 @@ export async function loadMenu(container) {
     }
     
     const rawPayload = await res.json();
-    const items = normalizeCatalogPayload(rawPayload);
+    const items = normalizeCatalogPayload(rawPayload)
+      .slice()
+      .sort((a, b) => {
+        if (a.stockRank !== b.stockRank) {
+          return a.stockRank - b.stockRank;
+        }
+        if (a.category !== b.category) {
+          return a.category.localeCompare(b.category);
+        }
+        return a.name.localeCompare(b.name);
+      });
 
     // Validate data structure
     if (!Array.isArray(items) || items.length === 0) {
@@ -253,7 +273,13 @@ export async function loadMenu(container) {
       <article class="card" tabindex="0" role="article" aria-label="${item.name}">
         <img src="${item.img}" alt="${item.name}" loading="lazy">
         <div style="padding:1rem;">
-          ${item.outOfStock ? '<p class="card-stock-badge" aria-label="Out of stock">Out of Stock</p>' : ""}
+          ${
+            item.outOfStock
+              ? '<p class="card-stock-badge" aria-label="Out of stock">Out of Stock</p>'
+              : item.lowStock
+                ? '<p class="card-stock-badge" aria-label="Low stock">Low Stock</p>'
+                : ""
+          }
           <h3>${item.name}</h3>
           <p>${item.desc}</p>
           <p class="price">${item.price}</p>
