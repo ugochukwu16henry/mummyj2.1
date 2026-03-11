@@ -4,6 +4,26 @@ import { loadMenu } from "./menu.js";
 import { openModal, closeModal } from "./modal.js";
 import { updateCartBadge } from "./cart-store.js";
 
+function addWhatsAppFloatingButton() {
+  if (window.location.pathname.endsWith("admin.html")) {
+    return;
+  }
+
+  if (document.getElementById("whatsapp-float")) {
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.id = "whatsapp-float";
+  link.className = "whatsapp-float";
+  link.href = "https://wa.me/2349068042947";
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.setAttribute("aria-label", "Chat on WhatsApp");
+  link.textContent = "Chat";
+  document.body.appendChild(link);
+}
+
 function applyMobileLayoutFallback() {
   const userAgent = navigator.userAgent || "";
   const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(userAgent);
@@ -18,6 +38,7 @@ function applyMobileLayoutFallback() {
 
 document.addEventListener("DOMContentLoaded", () => {
   applyMobileLayoutFallback();
+  addWhatsAppFloatingButton();
   updateCartBadge();
 
   // Hamburger menu toggle with accessibility

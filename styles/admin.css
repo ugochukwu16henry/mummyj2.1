@@ -357,6 +357,15 @@ pre {
   color: #ff9f9f;
 }
 
+.stock-chip.order {
+  background: rgba(217, 119, 6, 0.22);
+  color: #ffd39b;
+}
+
+.orders-panel {
+  margin-top: 1rem;
+}
+
 .row-actions {
   display: flex;
   gap: 0.4rem;

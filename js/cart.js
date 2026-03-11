@@ -76,7 +76,8 @@ function normalizeProducts(rawPayload) {
     category: item.category || "General",
     price: formatPrice(item.price),
     desc: item.desc || item.description || "",
-    img: item.img || item.image || "images/placeholder.png"
+    img: item.img || item.image || "images/placeholder.png",
+    orderOnly: Boolean(item.order_only)
   }));
 }
 
@@ -360,7 +361,9 @@ function renderUpsells() {
 
   const { items } = getCartState();
   const idsInCart = new Set(items.map((item) => String(item.id)));
-  const suggestions = menuItems.filter((item) => !idsInCart.has(String(item.id))).slice(0, 8);
+  const suggestions = menuItems
+    .filter((item) => !idsInCart.has(String(item.id)) && !item.orderOnly)
+    .slice(0, 8);
 
   upsellList.innerHTML = suggestions.map((item) => `
     <article class="upsell-card">

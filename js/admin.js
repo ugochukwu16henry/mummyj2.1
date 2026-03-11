@@ -537,6 +537,7 @@ productForm.addEventListener("submit", async (event) => {
 
   state.catalog.products.unshift(normalizeProduct(product));
   applyFilter();
+  renderOrders();
   renderJsonPreview();
   productForm.reset();
 
@@ -581,6 +582,7 @@ productsTable.addEventListener("click", (event) => {
     const productId = deleteButton.dataset.deleteProduct;
     state.catalog.products = state.catalog.products.filter((product) => String(product.id) !== String(productId));
     applyFilter();
+    renderOrders();
     renderJsonPreview();
     showSyncing(true, "Product deleted. Click Commit Changes to publish.");
     setTimeout(() => showSyncing(false), 1500);
@@ -623,6 +625,7 @@ addCategoryForm.addEventListener("submit", async (event) => {
   }
 
   renderCategories();
+  renderOrders();
   renderJsonPreview();
   input.value = "";
   if (imageInput) {
@@ -686,6 +689,7 @@ categoryList.addEventListener("click", (event) => {
     }
     applyFilter();
     renderCategories();
+    renderOrders();
     renderJsonPreview();
     showSyncing(true, "Category deleted. Click Commit Changes to publish.");
     setTimeout(() => showSyncing(false), 1500);
@@ -731,6 +735,7 @@ categoryList.addEventListener("click", (event) => {
 
   applyFilter();
   renderCategories();
+  renderOrders();
   renderJsonPreview();
 });
 
