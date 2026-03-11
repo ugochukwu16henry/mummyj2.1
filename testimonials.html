@@ -10,7 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles/base.css?v=20260311b">
+    <link rel="stylesheet" href="styles/base.css?v=20260311d">
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -27,6 +27,7 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="menu.html">Menu & Services</a></li>
                 <li><a href="about.html">About & Contact</a></li>
+                <li><a href="testimonials.html" aria-current="page">Stories</a></li>
                 <li><a href="cart.html">Cart</a></li>
             </ul>
         </nav>
@@ -37,16 +38,21 @@
     </header>
 
     <main id="main-content">
-        <h1>Customer Stories & Mummy J’s Blog</h1>
+        <section class="hero stories-hero">
+            <div class="hero-text">
+                <h1>Customer Stories & Mummy J’s Blog</h1>
+                <p>Real experiences, behind-the-scenes videos, and treats fresh from the oven.</p>
+            </div>
+        </section>
 
         <section class="featured-section" aria-label="Customer Testimonials">
             <h2>Customer Testimonials</h2>
-            <div id="testimonials-grid" class="grid" aria-live="polite"></div>
+            <div id="testimonials-grid" class="grid stories-grid" aria-live="polite"></div>
         </section>
 
         <section class="featured-section" aria-label="Blog & Videos">
             <h2>Mummy J’s Blog & Videos</h2>
-            <div id="blog-list" class="grid" aria-live="polite"></div>
+            <div id="blog-list" class="grid stories-grid" aria-live="polite"></div>
         </section>
     </main>
 

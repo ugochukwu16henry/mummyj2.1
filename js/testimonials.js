@@ -10,6 +10,15 @@ async function fetchContent() {
   return response.json();
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function renderHomeTestimonials(testimonials) {
   const container = document.getElementById("home-testimonials");
   if (!container) return;
@@ -29,7 +38,8 @@ function renderHomeTestimonials(testimonials) {
           <p>"${t.message}"</p>
           ${
             t.videoUrl
-              ? t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+              ? (t.videoUrl.startsWith("data:video")
+                  || t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i))
                 ? `<video src="${t.videoUrl}" controls style="width:100%;max-height:260px;border-radius:10px;margin-top:0.75rem;"></video>`
                 : `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
               : ""
@@ -58,7 +68,8 @@ function renderPageTestimonials(testimonials) {
           <p>"${t.message}"</p>
           ${
             t.videoUrl
-              ? t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+              ? (t.videoUrl.startsWith("data:video")
+                  || t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i))
                 ? `<video src="${t.videoUrl}" controls style="width:100%;max-height:320px;border-radius:10px;margin-top:0.75rem;"></video>`
                 : `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
               : ""
@@ -87,7 +98,8 @@ function renderBlog(posts) {
           <p>${post.body}</p>
           ${
             post.videoUrl
-              ? post.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+              ? (post.videoUrl.startsWith("data:video")
+                  || post.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i))
                 ? `<video src="${post.videoUrl}" controls style="width:100%;max-height:360px;border-radius:10px;margin-top:0.75rem;"></video>`
                 : `<p><a href="${post.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
               : ""
@@ -126,8 +138,8 @@ function setupTestimonialForm() {
 
     const name = document.getElementById("testimonial-name").value.trim();
     const message = document.getElementById("testimonial-message").value.trim();
-    const imageUrl = document.getElementById("testimonial-image").value.trim();
-    const videoUrl = document.getElementById("testimonial-video").value.trim();
+    const imageFile = document.getElementById("testimonial-image-file")?.files?.[0] || null;
+    const videoFile = document.getElementById("testimonial-video-file")?.files?.[0] || null;
 
     if (!name || !message) {
       status.textContent = "Please enter your name and testimony.";
@@ -135,6 +147,17 @@ function setupTestimonialForm() {
     }
 
     try {
+      let imageUrl = "";
+      let videoUrl = "";
+
+      if (imageFile) {
+        imageUrl = await fileToDataUrl(imageFile);
+      }
+
+      if (videoFile) {
+        videoUrl = await fileToDataUrl(videoFile);
+      }
+
       const response = await fetch(`${API_BASE}/testimonials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

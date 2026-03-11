@@ -38,6 +38,7 @@
                 <li><a href="index.html" aria-current="page">Home</a></li>
                 <li><a href="menu.html">Menu & Services</a></li>
                 <li><a href="about.html">About & Contact</a></li>
+                <li><a href="testimonials.html">Stories</a></li>
                 <li><a href="cart.html">Cart</a></li>
             </ul>
         </nav>
@@ -69,11 +70,11 @@
                 <label>Your Testimony
                     <textarea id="testimonial-message" rows="3" required></textarea>
                 </label>
-                <label>Photo URL (optional)
-                    <input type="url" id="testimonial-image" placeholder="Link to your picture (Instagram, Google Photos, etc.)">
+                <label>Photo (optional)
+                    <input type="file" id="testimonial-image-file" accept="image/*" capture="environment">
                 </label>
-                <label>Short Video URL (optional)
-                    <input type="url" id="testimonial-video" placeholder="YouTube, Instagram reel, etc.">
+                <label>Short Video (optional)
+                    <input type="file" id="testimonial-video-file" accept="video/*" capture="environment">
                 </label>
                 <button type="submit" class="btn btn-primary">Submit Testimony</button>
                 <p id="testimonial-status" class="testimonial-status" aria-live="polite"></p>
