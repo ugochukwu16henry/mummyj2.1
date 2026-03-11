@@ -25,6 +25,30 @@ const promoToggle = document.getElementById("promo-toggle");
 const promoSection = document.getElementById("promo-field");
 const toast = document.getElementById("cart-toast");
 
+function formatPrice(value) {
+  if (typeof value === "number") {
+    return `₦${value.toLocaleString("en-NG")}`;
+  }
+  return value || "₦0";
+}
+
+function normalizeProducts(rawPayload) {
+  const sourceItems = Array.isArray(rawPayload)
+    ? rawPayload
+    : Array.isArray(rawPayload?.products)
+      ? rawPayload.products
+      : [];
+
+  return sourceItems.map((item, index) => ({
+    id: item.id ?? `item-${index + 1}`,
+    name: item.name || "Untitled Product",
+    category: item.category || "General",
+    price: formatPrice(item.price),
+    desc: item.desc || item.description || "",
+    img: item.img || item.image || "images/placeholder.png"
+  }));
+}
+
 function showToast(message, withUndo = false, onUndo = null) {
   if (!toast) {
     return;
@@ -158,7 +182,7 @@ function attachCartEvents() {
   document.addEventListener("click", (event) => {
     const qtyBtn = event.target.closest("button[data-qty]");
     if (qtyBtn) {
-      const id = Number(qtyBtn.dataset.id);
+      const id = qtyBtn.dataset.id;
       const delta = Number(qtyBtn.dataset.qty);
       adjustItemQuantity(id, delta);
       renderCartItems();
@@ -167,7 +191,7 @@ function attachCartEvents() {
 
     const removeBtn = event.target.closest("button[data-remove]");
     if (removeBtn) {
-      const id = Number(removeBtn.dataset.remove);
+      const id = removeBtn.dataset.remove;
       const { removed, index } = removeItemFromCart(id);
       renderCartItems();
       if (removed) {
@@ -181,7 +205,7 @@ function attachCartEvents() {
 
     const saveBtn = event.target.closest("button[data-save]");
     if (saveBtn) {
-      moveItemToSaved(Number(saveBtn.dataset.save));
+      moveItemToSaved(saveBtn.dataset.save);
       renderCartItems();
       showToast("Item saved for later");
       return;
@@ -189,7 +213,7 @@ function attachCartEvents() {
 
     const moveBtn = event.target.closest("button[data-move]");
     if (moveBtn) {
-      moveSavedToCart(Number(moveBtn.dataset.move));
+      moveSavedToCart(moveBtn.dataset.move);
       renderCartItems();
       showToast("Item moved to cart");
       return;
@@ -197,8 +221,8 @@ function attachCartEvents() {
 
     const upsellBtn = event.target.closest("button[data-upsell]");
     if (upsellBtn) {
-      const id = Number(upsellBtn.dataset.upsell);
-      const item = menuItems.find((entry) => entry.id === id);
+      const id = upsellBtn.dataset.upsell;
+      const item = menuItems.find((entry) => String(entry.id) === String(id));
       if (item) {
         addItemToCart(item);
         renderCartItems();
@@ -224,7 +248,7 @@ function attachCartEvents() {
 
     const touchEndX = event.changedTouches[0].clientX;
     if (touchStartX - touchEndX > 80) {
-      const id = Number(card.dataset.id);
+      const id = card.dataset.id;
       const { removed, index } = removeItemFromCart(id);
       renderCartItems();
       if (removed) {
@@ -238,11 +262,12 @@ function attachCartEvents() {
 }
 
 async function loadMenuData() {
-  const response = await fetch("data/menu.json");
+  const response = await fetch("data/catalog.json");
   if (!response.ok) {
     throw new Error("Could not load menu data");
   }
-  menuItems = await response.json();
+  const rawPayload = await response.json();
+  menuItems = normalizeProducts(rawPayload);
 }
 
 function renderUpsells() {
@@ -251,8 +276,8 @@ function renderUpsells() {
   }
 
   const { items } = getCartState();
-  const idsInCart = new Set(items.map((item) => item.id));
-  const suggestions = menuItems.filter((item) => !idsInCart.has(item.id)).slice(0, 8);
+  const idsInCart = new Set(items.map((item) => String(item.id)));
+  const suggestions = menuItems.filter((item) => !idsInCart.has(String(item.id))).slice(0, 8);
 
   upsellList.innerHTML = suggestions.map((item) => `
     <article class="upsell-card">

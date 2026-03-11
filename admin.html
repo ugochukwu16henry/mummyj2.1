@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | mummyj2Treats</title>
+  <link rel="icon" type="image/png" href="favicon/mummyj2logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/admin.css">
+</head>
+
+<body>
+  <div id="sync-bar" class="sync-bar" hidden>Syncing catalog.json...</div>
+
+  <main class="admin-shell">
+    <section id="login-panel" class="panel login-panel">
+      <h1>mummyj2Treats Admin</h1>
+      <p>Sign in to manage catalog.json</p>
+      <form id="login-form">
+        <label>Email
+          <input type="email" id="login-email" value="admin@mummyj2treats.com" required>
+        </label>
+        <label>Password
+          <input type="password" id="login-password" value="admin123" required>
+        </label>
+        <button type="submit" class="btn primary">Login</button>
+      </form>
+      <small>Mock JWT login for local admin workflow.</small>
+      <p id="login-error" class="error"></p>
+    </section>
+
+    <section id="dashboard" class="dashboard" hidden>
+      <header class="dashboard-head">
+        <div>
+          <h1>Catalog Manager</h1>
+          <p>JSON-first product operations with commit-style syncing</p>
+        </div>
+        <div class="head-actions">
+          <button id="commit-btn" class="btn primary">Commit Changes</button>
+          <button id="logout-btn" class="btn ghost">Logout</button>
+        </div>
+      </header>
+
+      <section class="panel search-panel">
+        <input type="search" id="search-input" placeholder="Search by name/category/tag...">
+      </section>
+
+      <section class="grid">
+        <article class="panel products-panel">
+          <h2>Products</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock Status</th>
+                </tr>
+              </thead>
+              <tbody id="products-table"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel form-panel">
+          <h2>Add Product</h2>
+          <form id="product-form"></form>
+        </article>
+      </section>
+
+      <section class="grid lower-grid">
+        <article class="panel category-panel">
+          <h2>Category Manager</h2>
+          <form id="add-category-form" class="inline-form">
+            <input id="new-category" type="text" placeholder="New category" required>
+            <button class="btn ghost" type="submit">Add</button>
+          </form>
+          <div id="category-list" class="category-list"></div>
+        </article>
+
+        <article class="panel json-panel">
+          <h2>JSON Preview</h2>
+          <pre id="json-preview"></pre>
+        </article>
+      </section>
+    </section>
+
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <h3>Quick Edit</h3>
+        <button id="close-drawer" class="btn ghost">Close</button>
+      </div>
+      <form id="drawer-form">
+        <label>Price
+          <input type="number" id="drawer-price" min="0" step="100">
+        </label>
+        <label>Category
+          <input type="text" id="drawer-category">
+        </label>
+        <button class="btn primary" type="submit">Apply Change</button>
+      </form>
+      <h4>Change Preview</h4>
+      <pre id="drawer-preview"></pre>
+    </aside>
+  </main>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+
+</html>

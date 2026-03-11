@@ -73,9 +73,9 @@ function upsertItem(list, incoming) {
 export function addItemToCart(item) {
   const state = getCartState();
   const prepared = {
-    id: Number(item.id),
+    id: String(item.id),
     name: item.name,
-    img: item.img,
+    img: item.img || item.image || "images/placeholder.png",
     category: item.category || "",
     price: item.price,
     qty: Number(item.qty) > 0 ? Number(item.qty) : 1
@@ -89,7 +89,7 @@ export function addItemToCart(item) {
 
 export function adjustItemQuantity(id, delta) {
   const state = getCartState();
-  const target = state.items.find((item) => item.id === Number(id));
+  const target = state.items.find((item) => String(item.id) === String(id));
   if (!target) {
     return state;
   }
@@ -102,7 +102,7 @@ export function adjustItemQuantity(id, delta) {
 
 export function removeItemFromCart(id) {
   const state = getCartState();
-  const index = state.items.findIndex((item) => item.id === Number(id));
+  const index = state.items.findIndex((item) => String(item.id) === String(id));
   if (index < 0) {
     return { state, removed: null, index: -1 };
   }
@@ -128,7 +128,7 @@ export function restoreRemovedItem(removed, index) {
 
 export function moveItemToSaved(id) {
   const state = getCartState();
-  const index = state.items.findIndex((item) => item.id === Number(id));
+  const index = state.items.findIndex((item) => String(item.id) === String(id));
   if (index < 0) {
     return state;
   }
@@ -142,7 +142,7 @@ export function moveItemToSaved(id) {
 
 export function moveSavedToCart(id) {
   const state = getCartState();
-  const index = state.saved.findIndex((item) => item.id === Number(id));
+  const index = state.saved.findIndex((item) => String(item.id) === String(id));
   if (index < 0) {
     return state;
   }

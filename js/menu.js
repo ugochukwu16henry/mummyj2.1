@@ -3,6 +3,30 @@
 import { openModal } from "./modal.js";
 import { addItemToCart, updateCartBadge } from "./cart-store.js";
 
+function formatPrice(value) {
+  if (typeof value === "number") {
+    return `₦${value.toLocaleString("en-NG")}`;
+  }
+  return value || "₦0";
+}
+
+function normalizeCatalogPayload(rawPayload) {
+  const sourceItems = Array.isArray(rawPayload)
+    ? rawPayload
+    : Array.isArray(rawPayload?.products)
+      ? rawPayload.products
+      : [];
+
+  return sourceItems.map((item, index) => ({
+    id: item.id ?? `item-${index + 1}`,
+    name: item.name || "Untitled Product",
+    category: item.category || "General",
+    price: formatPrice(item.price),
+    desc: item.desc || item.description || "",
+    img: item.img || item.image || "images/placeholder.png"
+  }));
+}
+
 function showAddToCartToast(message) {
   const existing = document.getElementById("cart-toast");
   const toast = existing || document.createElement("div");
@@ -40,18 +64,23 @@ export async function loadMenu(container) {
     
     // Try different path formats for maximum compatibility
     const pathsToTry = [
+      // New catalog source
+      new URL('../data/catalog.json', import.meta.url).href,
       // Using script location (ES module base)
       new URL('../data/Menu.json', import.meta.url).href,
       new URL('../data/menu.json', import.meta.url).href,
       // Using document location
+      new URL('data/catalog.json', documentBaseUrl).href,
       new URL('data/Menu.json', documentBaseUrl).href,
       new URL('data/menu.json', documentBaseUrl).href,
       // Absolute paths for GitHub Pages
       '/wdd231/final/data/Menu.json',
       '/wdd231/final/data/menu.json',
       // Simple relative paths
+      './data/catalog.json',
       './data/Menu.json',
       './data/menu.json',
+      'data/catalog.json',
       'data/Menu.json',
       'data/menu.json'
     ].map(path => path.startsWith('http') ? path : new URL(path, window.location.origin).href);
@@ -106,7 +135,8 @@ export async function loadMenu(container) {
       throw new Error(errorMsg);
     }
     
-    const items = await res.json();
+    const rawPayload = await res.json();
+    const items = normalizeCatalogPayload(rawPayload);
 
     // Validate data structure
     if (!Array.isArray(items) || items.length === 0) {
