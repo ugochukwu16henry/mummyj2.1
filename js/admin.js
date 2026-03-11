@@ -313,11 +313,31 @@ function openDrawer(product) {
   drawer.setAttribute("aria-hidden", "false");
   document.getElementById("drawer-price").value = String(product.price);
   document.getElementById("drawer-category").value = product.category;
+  document.getElementById("drawer-image").value = product.image || "";
+  const drawerImageUpload = document.getElementById("drawer-image-upload");
+  if (drawerImageUpload) {
+    drawerImageUpload.value = "";
+  }
+  const drawerImagePreview = document.getElementById("drawer-image-preview");
+  if (drawerImagePreview) {
+    drawerImagePreview.src = product.image || "";
+    drawerImagePreview.hidden = !product.image;
+  }
   document.getElementById("drawer-out-of-stock").checked = Boolean(product.out_of_stock);
   drawerPreview.textContent = JSON.stringify(
     {
-      before: { price: product.price, category: product.category, out_of_stock: Boolean(product.out_of_stock) },
-      after: { price: product.price, category: product.category, out_of_stock: Boolean(product.out_of_stock) }
+      before: {
+        price: product.price,
+        category: product.category,
+        image: product.image,
+        out_of_stock: Boolean(product.out_of_stock)
+      },
+      after: {
+        price: product.price,
+        category: product.category,
+        image: product.image,
+        out_of_stock: Boolean(product.out_of_stock)
+      }
     },
     null,
     2
@@ -681,19 +701,61 @@ drawerForm.addEventListener("input", () => {
 
   const nextPrice = Number(document.getElementById("drawer-price").value || product.price);
   const nextCategory = document.getElementById("drawer-category").value || product.category;
+  const nextImage = document.getElementById("drawer-image").value || product.image;
   const nextOutOfStock = document.getElementById("drawer-out-of-stock").checked;
 
   drawerPreview.textContent = JSON.stringify(
     {
-      before: { price: product.price, category: product.category, out_of_stock: Boolean(product.out_of_stock) },
-      after: { price: nextPrice, category: nextCategory, out_of_stock: nextOutOfStock }
+      before: {
+        price: product.price,
+        category: product.category,
+        image: product.image,
+        out_of_stock: Boolean(product.out_of_stock)
+      },
+      after: {
+        price: nextPrice,
+        category: nextCategory,
+        image: nextImage,
+        out_of_stock: nextOutOfStock
+      }
     },
     null,
     2
   );
 });
 
-drawerForm.addEventListener("submit", (event) => {
+drawerForm.addEventListener("change", async (event) => {
+  const fileInput = event.target.closest("#drawer-image-upload");
+  if (!fileInput) {
+    return;
+  }
+
+  const selected = fileInput.files?.[0] || null;
+  const preview = document.getElementById("drawer-image-preview");
+  if (!preview) {
+    return;
+  }
+
+  if (!selected) {
+    const existing = document.getElementById("drawer-image")?.value || "";
+    preview.src = existing;
+    preview.hidden = !existing;
+    return;
+  }
+
+  try {
+    const optimized = await optimizeImageFile(selected, "product");
+    document.getElementById("drawer-image").value = optimized;
+    preview.src = optimized;
+    preview.hidden = false;
+  } catch (error) {
+    showSyncing(true, `Image update failed: ${error.message} Try a smaller image.`);
+    setTimeout(() => showSyncing(false), 1800);
+    fileInput.value = "";
+  }
+});
+
+drawerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.editingId) {
     return;
@@ -701,6 +763,21 @@ drawerForm.addEventListener("submit", (event) => {
 
   const nextPrice = Number(document.getElementById("drawer-price").value || 0);
   const nextCategory = document.getElementById("drawer-category").value.trim();
+  const drawerImageInput = document.getElementById("drawer-image");
+  const drawerImageUpload = document.getElementById("drawer-image-upload");
+  let nextImage = (drawerImageInput?.value || "").trim();
+
+  try {
+    const uploaded = drawerImageUpload?.files?.[0] || null;
+    if (uploaded) {
+      nextImage = await optimizeImageFile(uploaded, "product");
+    }
+  } catch (error) {
+    showSyncing(true, `Image update failed: ${error.message} Try a smaller image.`);
+    setTimeout(() => showSyncing(false), 1800);
+    return;
+  }
+
   const nextOutOfStock = document.getElementById("drawer-out-of-stock").checked;
 
   state.catalog.products = state.catalog.products.map((product) => {
@@ -712,6 +789,7 @@ drawerForm.addEventListener("submit", (event) => {
       ...product,
       price: nextPrice,
       category: nextCategory,
+      image: nextImage || product.image,
       out_of_stock: nextOutOfStock,
       last_updated: new Date().toISOString().slice(0, 10)
     };

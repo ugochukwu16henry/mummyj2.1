@@ -290,6 +290,15 @@ td img {
   margin-bottom: 0.6rem;
 }
 
+#drawer-image-preview {
+  width: 88px;
+  height: 88px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  margin-bottom: 0.7rem;
+}
+
 pre {
   white-space: pre-wrap;
   background: #0d121a;

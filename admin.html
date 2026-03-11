@@ -129,6 +129,13 @@
         <label>Category
           <input type="text" id="drawer-category">
         </label>
+        <label>Image Path
+          <input type="text" id="drawer-image" placeholder="images/item.jpg or data URL">
+        </label>
+        <label>Upload New Product Image
+          <input type="file" id="drawer-image-upload" accept="image/*" capture="environment">
+        </label>
+        <img id="drawer-image-preview" alt="Selected product preview" hidden>
         <label class="toggle-row">
           <input type="checkbox" id="drawer-out-of-stock">
           Mark as Out of Stock
