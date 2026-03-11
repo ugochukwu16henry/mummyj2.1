@@ -166,8 +166,25 @@ h2 {
     margin-bottom: 1.5rem;
 }
 
+.stories-hero .hero-text {
+    position: static;
+    transform: none;
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+    background: linear-gradient(135deg, #C65D48, #D97706);
+    border-radius: 14px;
+    padding: 1.5rem 1.25rem;
+}
+
 .stories-grid .card {
     text-align: left;
+}
+
+.stories-grid .card img,
+.stories-grid .card video {
+    width: 100%;
+    border-radius: 10px;
 }
 
 .hero-text {
@@ -1512,6 +1529,51 @@ body.force-mobile .remove-item {
     body.force-mobile #menu-grid .card-actions {
         grid-template-columns: 1fr;
         gap: 0.55rem;
+    }
+
+    .stories-hero {
+        margin-top: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .stories-hero .hero-text {
+        border-radius: 12px;
+        padding: 1rem 0.9rem;
+    }
+
+    .stories-hero .hero-text h1 {
+        font-size: 1.55rem;
+        line-height: 1.25;
+        margin: 0;
+    }
+
+    #testimonials-grid.grid,
+    #blog-list.grid {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+    }
+
+    .stories-grid .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .stories-grid .card img,
+    .stories-grid .card video {
+        max-height: 220px;
+        object-fit: cover;
+    }
+
+    .testimonial-form {
+        margin-top: 1rem;
+        padding: 1rem 0.9rem;
+        border-radius: 12px;
+    }
+
+    .testimonial-form input,
+    .testimonial-form textarea,
+    .testimonial-form button {
+        min-height: 44px;
     }
 
     body.cart-screen .cart-page,
