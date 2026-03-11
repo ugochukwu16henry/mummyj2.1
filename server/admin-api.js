@@ -5,9 +5,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from "node:url";
-import { config as loadEnv } from "dotenv";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -22,17 +19,6 @@ const __dirname = path.dirname(__filename);
 const CATALOG_PATH = path.resolve(__dirname, "../data/catalog.json");
 const CONTENT_PATH = path.resolve(__dirname, "../data/content.json");
 const AUTH_CONFIG_PATH = path.resolve(__dirname, "../data/admin-auth.json");
-function readS3Config() {
-  return {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || process.env.ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || process.env.SECRET_ACCESS_KEY || "",
-    region: process.env.S3_REGION || process.env.AWS_REGION || process.env.REGION || "us-east-1",
-    bucketName: process.env.S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME || process.env.BUCKET_NAME || process.env.BUCKET || "",
-    endpoint: process.env.S3_ENDPOINT || process.env.ENDPOINT_URL || "",
-    publicBaseUrl: process.env.S3_PUBLIC_BASE_URL || "",
-    forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || "true").toLowerCase() !== "false"
-  };
-}
 
 app.use(cors());
 app.use(express.json({ limit: "30mb" }));
@@ -246,87 +232,6 @@ async function writeAdminAuth(nextAuth) {
   return safeAuth;
 }
 
-function ensureS3Config() {
-  let cfg = readS3Config();
-
-  if (!cfg.accessKeyId || !cfg.secretAccessKey || !cfg.bucketName) {
-    loadEnv({ path: path.resolve(process.cwd(), ".env") });
-    cfg = readS3Config();
-  }
-
-  const missing = [];
-  if (!cfg.accessKeyId) missing.push("S3_ACCESS_KEY_ID/AWS_ACCESS_KEY_ID/ACCESS_KEY_ID");
-  if (!cfg.secretAccessKey) missing.push("S3_SECRET_ACCESS_KEY/AWS_SECRET_ACCESS_KEY/SECRET_ACCESS_KEY");
-  if (!cfg.bucketName) missing.push("S3_BUCKET_NAME/AWS_BUCKET_NAME/BUCKET_NAME/BUCKET");
-
-  if (missing.length) {
-    throw new Error(`S3 is not configured. Missing: ${missing.join(", ")}`);
-  }
-
-  return cfg;
-}
-
-function getS3Client() {
-  const cfg = ensureS3Config();
-  return new S3Client({
-    region: cfg.region,
-    endpoint: cfg.endpoint || undefined,
-    forcePathStyle: cfg.forcePathStyle,
-    credentials: {
-      accessKeyId: cfg.accessKeyId,
-      secretAccessKey: cfg.secretAccessKey
-    }
-  });
-}
-
-function safeFilename(fileName = "upload.bin") {
-  const clean = String(fileName)
-    .trim()
-    .replace(/[^a-zA-Z0-9._-]/g, "-")
-    .replace(/-+/g, "-");
-
-  return clean || "upload.bin";
-}
-
-function encodeKey(key) {
-  return String(key)
-    .split("/")
-    .map((part) => encodeURIComponent(part))
-    .join("/");
-}
-
-function buildPublicFileUrl(key) {
-  const cfg = ensureS3Config();
-  const encodedKey = encodeKey(key);
-
-  if (cfg.publicBaseUrl) {
-    return `${cfg.publicBaseUrl.replace(/\/$/, "")}/${encodedKey}`;
-  }
-
-  if (cfg.endpoint) {
-    return `${cfg.endpoint.replace(/\/$/, "")}/${cfg.bucketName}/${encodedKey}`;
-  }
-
-  return `https://${cfg.bucketName}.s3.${cfg.region}.amazonaws.com/${encodedKey}`;
-}
-
-async function createPresignedUpload({ fileName, fileType, folder = "testimonials" }) {
-  const cfg = ensureS3Config();
-  const client = getS3Client();
-  const safeName = safeFilename(fileName);
-  const key = `${String(folder).replace(/^\/+|\/+$/g, "")}/${Date.now()}-${safeName}`;
-
-  const command = new PutObjectCommand({
-    Bucket: cfg.bucketName,
-    Key: key,
-    ContentType: fileType || "application/octet-stream"
-  });
-
-  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 60 * 15 });
-  const fileUrl = buildPublicFileUrl(key);
-
-  return { key, uploadUrl, fileUrl };
-}
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || "";
@@ -347,26 +252,6 @@ function authMiddleware(req, res, next) {
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
-});
-
-app.post("/api/uploads/presign", async (req, res) => {
-  try {
-    const { fileName, fileType, folder } = req.body || {};
-
-    if (!fileName) {
-      return res.status(400).json({ error: "fileName is required" });
-    }
-
-    const payload = await createPresignedUpload({
-      fileName,
-      fileType,
-      folder: folder || "testimonials"
-    });
-
-    return res.status(200).json(payload);
-  } catch (error) {
-    return res.status(500).json({ error: error.message || "Could not create upload URL" });
-  }
 });
 
 app.post("/api/auth/login", async (req, res) => {

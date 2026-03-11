@@ -59,48 +59,23 @@ async function compressImageForUpload(file) {
   return fallbackResponse.blob();
 }
 
-async function requestUploadUrl(fileName, fileType, folder) {
-  const response = await fetch(`${API_BASE}/uploads/presign`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fileName, fileType, folder })
-  });
-
-  const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(payload?.error || "Could not prepare file upload");
+async function uploadFileToBucket(fileOrBlob, fileName, fileType, folder, onProgress) {
+  if (!fileOrBlob) {
+    return "";
   }
 
-  return payload;
-}
+  const total = fileOrBlob.size || 1;
+  if (typeof onProgress === "function") {
+    onProgress(0, total);
+  }
 
-async function uploadFileToBucket(fileOrBlob, fileName, fileType, folder, onProgress) {
-  const signed = await requestUploadUrl(fileName, fileType, folder);
+  const dataUrl = await fileToDataUrl(fileOrBlob);
 
-  await new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", signed.uploadUrl, true);
-    xhr.setRequestHeader("Content-Type", fileType || "application/octet-stream");
+  if (typeof onProgress === "function") {
+    onProgress(total, total);
+  }
 
-    xhr.upload.onprogress = (event) => {
-      if (typeof onProgress === "function") {
-        onProgress(event.loaded || 0, event.total || 0);
-      }
-    };
-
-    xhr.onerror = () => reject(new Error("Could not upload media file"));
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error("Could not upload media file"));
-      }
-    };
-
-    xhr.send(fileOrBlob);
-  });
-
-  return signed.fileUrl;
+  return dataUrl;
 }
 
 function validateFileSize(file, maxBytes) {
