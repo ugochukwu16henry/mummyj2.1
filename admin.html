@@ -134,11 +134,11 @@
               <label>Body
                 <textarea id="blog-body" rows="3" required></textarea>
               </label>
-              <label>Image URL (optional)
-                <input type="url" id="blog-image">
+              <label>Cover Image (optional)
+                <input type="file" id="blog-image-file" accept="image/*" capture="environment">
               </label>
-              <label>Video URL (optional)
-                <input type="url" id="blog-video">
+              <label>Short Video (optional)
+                <input type="file" id="blog-video-file" accept="video/*" capture="environment">
               </label>
               <button type="submit" class="btn primary">Publish Post</button>
               <p id="blog-message" class="account-message" aria-live="polite"></p>

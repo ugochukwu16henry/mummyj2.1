@@ -110,6 +110,42 @@ async function canvasToDataUrl(canvas, mimeType, quality) {
   return canvas.toDataURL(mimeType, quality);
 }
 
+async function uploadToS3(file, folder) {
+  if (!file) {
+    return "";
+  }
+
+  const presign = await apiFetch("/uploads/presign", {
+    method: "POST",
+    body: JSON.stringify({
+      fileName: file.name,
+      fileType: file.type,
+      folder
+    })
+  });
+
+  const uploadUrl = presign.uploadUrl || presign.uploadURL;
+  const fileUrl = presign.fileUrl || presign.fileURL;
+
+  if (!uploadUrl || !fileUrl) {
+    throw new Error("Could not create upload URL");
+  }
+
+  const putResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream"
+    },
+    body: file
+  });
+
+  if (!putResponse.ok) {
+    throw new Error("Could not upload file to storage");
+  }
+
+  return fileUrl;
+}
+
 async function optimizeImageFile(file, profile = "product") {
   if (!file) {
     return "";
@@ -1064,8 +1100,8 @@ if (blogForm && blogMessage) {
 
     const title = document.getElementById("blog-title").value.trim();
     const body = document.getElementById("blog-body").value.trim();
-    const imageUrl = document.getElementById("blog-image").value.trim();
-    const videoUrl = document.getElementById("blog-video").value.trim();
+    const imageFile = document.getElementById("blog-image-file")?.files?.[0] || null;
+    const videoFile = document.getElementById("blog-video-file")?.files?.[0] || null;
 
     if (!title || !body) {
       blogMessage.textContent = "Title and body are required.";
@@ -1075,6 +1111,17 @@ if (blogForm && blogMessage) {
     }
 
     try {
+      let imageUrl = "";
+      let videoUrl = "";
+
+      if (imageFile) {
+        imageUrl = await uploadToS3(imageFile, "blog-images");
+      }
+
+      if (videoFile) {
+        videoUrl = await uploadToS3(videoFile, "blog-videos");
+      }
+
       await apiFetch("/admin/posts", {
         method: "POST",
         body: JSON.stringify({ title, body, imageUrl, videoUrl })
