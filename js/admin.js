@@ -44,6 +44,12 @@ const accountEmail = document.getElementById("account-email");
 const accountForm = document.getElementById("account-form");
 const accountMessage = document.getElementById("account-message");
 
+const IMAGE_LIMITS = {
+  product: { maxWidth: 1200, maxHeight: 1200, quality: 0.78 },
+  category: { maxWidth: 720, maxHeight: 720, quality: 0.74 },
+  preview: { maxWidth: 360, maxHeight: 360, quality: 0.7 }
+};
+
 async function fileToDataUrl(file) {
   if (!file) {
     return "";
@@ -55,6 +61,64 @@ async function fileToDataUrl(file) {
     reader.onerror = () => reject(new Error("Could not read image file"));
     reader.readAsDataURL(file);
   });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read image file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageFromDataUrl(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not load image"));
+    image.src = dataUrl;
+  });
+}
+
+async function canvasToDataUrl(canvas, mimeType, quality) {
+  if (canvas.toBlob) {
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, quality));
+    if (blob) {
+      return readFileAsDataUrl(blob);
+    }
+  }
+  return canvas.toDataURL(mimeType, quality);
+}
+
+async function optimizeImageFile(file, profile = "product") {
+  if (!file) {
+    return "";
+  }
+
+  const { maxWidth, maxHeight, quality } = IMAGE_LIMITS[profile] || IMAGE_LIMITS.product;
+  const sourceDataUrl = await fileToDataUrl(file);
+  const image = await loadImageFromDataUrl(sourceDataUrl);
+
+  const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return sourceDataUrl;
+  }
+
+  context.drawImage(image, 0, 0, width, height);
+
+  const originalType = String(file.type || "").toLowerCase();
+  const hasAlpha = originalType.includes("png") || originalType.includes("webp");
+  const outputType = hasAlpha ? "image/webp" : "image/jpeg";
+  return canvasToDataUrl(canvas, outputType, quality);
 }
 
 function showSyncing(show, message = "Syncing catalog.json...") {
@@ -375,7 +439,7 @@ productForm.addEventListener("submit", async (event) => {
   try {
     const uploadedImage = document.getElementById("product-image-upload")?.files?.[0] || null;
     if (uploadedImage) {
-      product.image = await fileToDataUrl(uploadedImage);
+      product.image = await optimizeImageFile(uploadedImage, "product");
     }
   } catch (error) {
     showSyncing(true, `Image upload failed: ${error.message}`);
@@ -422,7 +486,7 @@ productForm.addEventListener("change", async (event) => {
   }
 
   try {
-    preview.src = await fileToDataUrl(selected);
+    preview.src = await optimizeImageFile(selected, "preview");
     preview.hidden = false;
   } catch (_error) {
     preview.hidden = true;
@@ -471,7 +535,7 @@ addCategoryForm.addEventListener("submit", async (event) => {
       if (!state.catalog.category_images || typeof state.catalog.category_images !== "object") {
         state.catalog.category_images = {};
       }
-      state.catalog.category_images[value] = await fileToDataUrl(uploaded);
+      state.catalog.category_images[value] = await optimizeImageFile(uploaded, "category");
     }
   } catch (error) {
     showSyncing(true, `Category image upload failed: ${error.message}`);
@@ -502,7 +566,7 @@ categoryList.addEventListener("change", async (event) => {
     if (!state.catalog.category_images || typeof state.catalog.category_images !== "object") {
       state.catalog.category_images = {};
     }
-    state.catalog.category_images[category] = await fileToDataUrl(selected);
+    state.catalog.category_images[category] = await optimizeImageFile(selected, "category");
     renderCategories();
     renderJsonPreview();
     showSyncing(true, `Updated image for ${category}. Click Commit Changes to publish.`);
