@@ -190,6 +190,19 @@ function normalizeProduct(product) {
   };
 }
 
+function renderMediaPreview(url, maxHeight) {
+  if (!url) {
+    return "";
+  }
+  const safeUrl = String(url);
+  const isInlineVideo = safeUrl.startsWith("data:video");
+  const isFileVideo = /\.(mp4|webm|ogg)(\?|$)/i.test(safeUrl);
+  if (isInlineVideo || isFileVideo) {
+    return `<video src="${safeUrl}" controls style="width:100%;max-height:${maxHeight}px;border-radius:10px;margin-top:0.4rem;"></video>`;
+  }
+  return `<img src="${safeUrl}" alt="" style="width:100%;max-height:${maxHeight}px;object-fit:cover;border-radius:10px;margin-top:0.4rem;">`;
+}
+
 function renderSchemaForm() {
   productForm.innerHTML = JSON_SCHEMA.map((field) => {
     if (field.type === "checkbox") {
@@ -437,6 +450,8 @@ async function loadContent() {
                 <strong>${t.name}</strong><br>
                 <small>${new Date(t.createdAt || Date.now()).toLocaleString()}</small>
                 <p>${t.message}</p>
+                ${renderMediaPreview(t.imageUrl, 120)}
+                ${renderMediaPreview(t.videoUrl, 160)}
                 <button type="button" class="btn mini" data-approve-testimonial="${t.id}">Approve</button>
                 <button type="button" class="btn mini danger" data-delete-testimonial="${t.id}">Delete</button>
               </div>
@@ -452,9 +467,10 @@ async function loadContent() {
             .map((t) => `
               <div>
                 <strong>${t.name}</strong><br>
-                <small>${new Date(t.createdAt || Date.now()).toLocaleString()}</small>
+                <small>${new Date(t.approvedAt || t.createdAt || Date.now()).toLocaleString()}</small>
                 <p>${t.message}</p>
-                ${t.videoUrl ? `<small>Video: ${t.videoUrl}</small><br>` : ""}
+                ${renderMediaPreview(t.imageUrl, 120)}
+                ${renderMediaPreview(t.videoUrl, 160)}
                 <button type="button" class="btn mini danger" data-delete-testimonial="${t.id}">Delete</button>
               </div>
             `)
@@ -470,7 +486,8 @@ async function loadContent() {
                 <strong>${post.title}</strong><br>
                 <small>${new Date(post.createdAt || Date.now()).toLocaleString()}</small>
                 <p>${post.body}</p>
-                ${post.videoUrl ? `<small>Video: ${post.videoUrl}</small><br>` : ""}
+                ${renderMediaPreview(post.imageUrl, 120)}
+                ${renderMediaPreview(post.videoUrl, 160)}
                 <button type="button" class="btn mini danger" data-delete-post="${post.id}">Delete</button>
               </div>
             `)
