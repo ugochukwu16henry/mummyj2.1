@@ -3,6 +3,8 @@
 import { openModal } from "./modal.js";
 import { addItemToCart, updateCartBadge } from "./cart-store.js";
 
+let addToastTimer = null;
+
 function formatPrice(value) {
   if (typeof value === "number") {
     return `₦${value.toLocaleString("en-NG")}`;
@@ -33,14 +35,28 @@ function showAddToCartToast(message) {
   const toast = existing || document.createElement("div");
   toast.id = "cart-toast";
   toast.className = "cart-toast";
-  toast.textContent = message;
+  toast.innerHTML = "";
+
+  const text = document.createElement("span");
+  text.textContent = message;
+  toast.appendChild(text);
+
+  const action = document.createElement("a");
+  action.href = "cart.html";
+  action.className = "toast-link";
+  action.textContent = "View Cart";
+  toast.appendChild(action);
 
   if (!existing) {
     document.body.appendChild(toast);
   }
 
   toast.classList.add("show");
-  window.setTimeout(() => {
+  if (addToastTimer) {
+    window.clearTimeout(addToastTimer);
+  }
+
+  addToastTimer = window.setTimeout(() => {
     toast.classList.remove("show");
   }, 2200);
 }

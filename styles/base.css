@@ -657,6 +657,19 @@ select:invalid:not(:placeholder-shown) {
     background: rgba(61, 64, 91, 0.09);
 }
 
+.mobile-close {
+    text-decoration: none;
+    color: var(--dark);
+    font-size: 1.2rem;
+    width: 2.3rem;
+    height: 2.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(61, 64, 91, 0.09);
+}
+
 .cart-items {
     display: grid;
     gap: 1rem;
@@ -969,7 +982,7 @@ select:invalid:not(:placeholder-shown) {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(61, 64, 91, 0.14);
-    padding: 0.75rem 1rem 0.95rem;
+    padding: 0.75rem 1rem calc(0.95rem + env(safe-area-inset-bottom));
     gap: 0.65rem;
     z-index: 1300;
 }
@@ -996,6 +1009,16 @@ select:invalid:not(:placeholder-shown) {
     border-radius: 12px;
     padding: 0.85rem 1rem;
     font-size: 0.98rem;
+    animation: checkoutPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes checkoutPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(224, 122, 95, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(224, 122, 95, 0);
+    }
 }
 
 .cart-toast {
@@ -1033,6 +1056,17 @@ select:invalid:not(:placeholder-shown) {
     text-decoration: underline;
 }
 
+.toast-link {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #FFD89B;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
 .cart-empty {
     background: #fff;
     border-radius: 14px;
@@ -1054,6 +1088,15 @@ select:invalid:not(:placeholder-shown) {
 
 /* Responsive improvements */
 @media (max-width: 768px) {
+    body.cart-screen header,
+    body.cart-screen footer {
+        display: none;
+    }
+
+    body.cart-screen main {
+        padding-top: 1rem;
+    }
+
     header {
         flex-wrap: wrap;
         gap: 0.8rem;
@@ -1108,14 +1151,15 @@ select:invalid:not(:placeholder-shown) {
 
     .cart-mobile-header {
         display: grid;
-        grid-template-columns: 2.3rem 1fr 2.3rem;
+        grid-template-columns: 1fr auto;
         align-items: center;
         margin-bottom: 0.9rem;
+        column-gap: 0.7rem;
     }
 
     .cart-mobile-header p {
         margin: 0;
-        text-align: center;
+        text-align: left;
         font-weight: 600;
         color: var(--dark);
     }
@@ -1146,6 +1190,18 @@ select:invalid:not(:placeholder-shown) {
 
     .order-summary {
         position: static;
+        display: block;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        margin-top: 0.8rem;
+    }
+
+    .express-checkout,
+    .order-summary .summary-lines,
+    .order-summary .checkout-btn,
+    .order-summary .trust-badges {
         display: none;
     }
 
@@ -1154,17 +1210,33 @@ select:invalid:not(:placeholder-shown) {
         flex-direction: column;
     }
 
+    .cart-items {
+        gap: 0;
+    }
+
     .cart-item {
-        padding: 0.9rem;
+        padding: 0.9rem 0;
+        border-radius: 0;
+        box-shadow: none;
+        border-bottom: 1px solid rgba(61, 64, 91, 0.14);
+    }
+
+    .cart-item-shell {
+        grid-template-columns: 100px minmax(0, 1fr);
     }
 
     .cart-item img {
-        max-height: 96px;
+        max-height: 100px;
     }
 
     .cart-item-actions {
-        flex-wrap: wrap;
-        gap: 0.8rem;
+        justify-content: flex-end;
+        align-items: flex-end;
+        gap: 0.65rem;
+    }
+
+    .remove-item {
+        display: none;
     }
 
     .cart-page {
@@ -1201,7 +1273,7 @@ select:invalid:not(:placeholder-shown) {
         min-width: 120px;
     }
 
-    .cart-toast {
+    body.cart-screen .cart-toast {
         right: 0.75rem;
         left: 0.75rem;
         bottom: 5.4rem;
@@ -1223,6 +1295,14 @@ select:invalid:not(:placeholder-shown) {
         gap: 0.75rem;
     }
 
+    .swipe-delete {
+        width: 76px;
+    }
+
+    .cart-item.swiped .cart-item-shell {
+        transform: translateX(-70px);
+    }
+
     .qty-control {
         min-height: 44px;
         padding: 0.3rem 0.55rem;
@@ -1241,5 +1321,17 @@ select:invalid:not(:placeholder-shown) {
     .mobile-checkout-bar .btn {
         min-width: 105px;
         padding: 0.7rem 0.9rem;
+    }
+}
+
+@media (max-width: 430px) {
+    .cart-item-shell {
+        grid-template-columns: 88px minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-checkout-bar .btn {
+        animation: none;
     }
 }
