@@ -17,6 +17,9 @@ const TAX_RATE = 0.075;
 
 let menuItems = [];
 let undoTimer = null;
+let touchStartX = 0;
+let activeTouchCard = null;
+let previousTotal = 0;
 
 const cartList = document.getElementById("cart-items");
 const savedList = document.getElementById("saved-items");
@@ -24,6 +27,34 @@ const upsellList = document.getElementById("upsell-track");
 const promoToggle = document.getElementById("promo-toggle");
 const promoSection = document.getElementById("promo-field");
 const toast = document.getElementById("cart-toast");
+
+function animateCurrencyChange(elementId, startValue, endValue, duration = 240) {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return;
+  }
+
+  if (startValue === endValue) {
+    element.textContent = formatNaira(endValue);
+    return;
+  }
+
+  const startTime = performance.now();
+  const valueDelta = endValue - startValue;
+
+  function tick(now) {
+    const progress = Math.min(1, (now - startTime) / duration);
+    const easedProgress = 1 - ((1 - progress) ** 2);
+    const nextValue = startValue + (valueDelta * easedProgress);
+    element.textContent = formatNaira(nextValue);
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
 
 function formatPrice(value) {
   if (typeof value === "number") {
@@ -103,18 +134,41 @@ function updateSummary(items) {
   document.getElementById("subtotal").textContent = formatNaira(totals.subtotal);
   document.getElementById("shipping").textContent = totals.shipping === 0 ? "Free" : formatNaira(totals.shipping);
   document.getElementById("tax").textContent = formatNaira(totals.tax);
-  document.getElementById("order-total").textContent = formatNaira(totals.total);
+  animateCurrencyChange("order-total", previousTotal, totals.total);
 
   const progress = document.getElementById("shipping-progress-fill");
   const progressText = document.getElementById("shipping-progress-text");
   const progressPercent = Math.min(100, (totals.subtotal / SHIPPING_THRESHOLD) * 100);
-  progress.style.width = `${progressPercent}%`;
-  progressText.textContent = totals.remainingForFreeShipping > 0
+  if (progress) {
+    progress.style.width = `${progressPercent}%`;
+  }
+  const progressMessage = totals.remainingForFreeShipping > 0
     ? `Add ${formatNaira(totals.remainingForFreeShipping)} for free shipping`
     : "You unlocked free shipping";
+  if (progressText) {
+    progressText.textContent = progressMessage;
+  }
 
-  const mobileTotal = document.getElementById("mobile-total");
-  mobileTotal.textContent = formatNaira(totals.total);
+  const mobileProgress = document.getElementById("mobile-shipping-progress-fill");
+  const mobileProgressText = document.getElementById("mobile-shipping-progress-text");
+  if (mobileProgress) {
+    mobileProgress.style.width = `${progressPercent}%`;
+  }
+  if (mobileProgressText) {
+    mobileProgressText.textContent = progressMessage;
+  }
+
+  const mobileStickyTotal = document.getElementById("mobile-subtotal");
+  if (mobileStickyTotal) {
+    animateCurrencyChange("mobile-subtotal", previousTotal, totals.total);
+  }
+
+  const mobileTitle = document.getElementById("mobile-cart-title");
+  if (mobileTitle) {
+    mobileTitle.textContent = `Your Cart (${items.length} item${items.length === 1 ? "" : "s"})`;
+  }
+
+  previousTotal = totals.total;
 }
 
 function renderCartItems() {
@@ -136,25 +190,28 @@ function renderCartItems() {
   } else {
     cartList.innerHTML = items.map((item) => `
       <article class="cart-item" data-id="${item.id}">
-        <img src="${item.img}" alt="${item.name}">
-        <div class="cart-item-content">
-          <div class="cart-item-top">
-            <div>
-              <h3>${item.name}</h3>
-              <p class="cart-meta">${item.category}</p>
-              <button class="save-later" data-save="${item.id}">Save for later</button>
+        <div class="cart-item-shell">
+          <img src="${item.img}" alt="${item.name}">
+          <div class="cart-item-content">
+            <div class="cart-item-top">
+              <div>
+                <h3>${item.name}</h3>
+                <p class="cart-meta">${item.category}</p>
+                <button class="save-later" data-save="${item.id}">Save for later</button>
+              </div>
+              <p class="cart-price">${item.price}</p>
             </div>
-            <p class="cart-price">${item.price}</p>
-          </div>
-          <div class="cart-item-actions">
-            <div class="qty-control" aria-label="Quantity controls for ${item.name}">
-              <button type="button" data-qty="-1" data-id="${item.id}" aria-label="Decrease quantity">-</button>
-              <span>${item.qty}</span>
-              <button type="button" data-qty="1" data-id="${item.id}" aria-label="Increase quantity">+</button>
+            <div class="cart-item-actions">
+              <div class="qty-control" aria-label="Quantity controls for ${item.name}">
+                <button type="button" data-qty="-1" data-id="${item.id}" aria-label="Decrease quantity">-</button>
+                <span>${item.qty}</span>
+                <button type="button" data-qty="1" data-id="${item.id}" aria-label="Increase quantity">+</button>
+              </div>
+              <button type="button" class="remove-item" data-remove="${item.id}" aria-label="Remove ${item.name}">Remove</button>
             </div>
-            <button type="button" class="remove-item" data-remove="${item.id}" aria-label="Remove ${item.name}">Remove</button>
           </div>
         </div>
+        <button type="button" class="swipe-delete" data-swipe-remove="${item.id}" aria-label="Delete ${item.name}">Delete</button>
       </article>
     `).join("");
   }
@@ -180,6 +237,27 @@ function renderCartItems() {
 
 function attachCartEvents() {
   document.addEventListener("click", (event) => {
+    const swipedDeleteBtn = event.target.closest("button[data-swipe-remove]");
+    if (swipedDeleteBtn) {
+      const id = swipedDeleteBtn.dataset.swipeRemove;
+      const { removed, index } = removeItemFromCart(id);
+      renderCartItems();
+      if (removed) {
+        showToast(`${removed.name} removed from cart`, true, () => {
+          restoreRemovedItem(removed, index);
+          renderCartItems();
+        });
+      }
+      return;
+    }
+
+    const cartCard = event.target.closest(".cart-item");
+    if (!cartCard) {
+      document.querySelectorAll(".cart-item.swiped").forEach((item) => {
+        item.classList.remove("swiped");
+      });
+    }
+
     const qtyBtn = event.target.closest("button[data-qty]");
     if (qtyBtn) {
       const id = qtyBtn.dataset.id;
@@ -231,33 +309,36 @@ function attachCartEvents() {
     }
   });
 
-  let touchStartX = 0;
   document.addEventListener("touchstart", (event) => {
     const card = event.target.closest(".cart-item");
     if (!card) {
       return;
     }
     touchStartX = event.changedTouches[0].clientX;
+    activeTouchCard = card;
   }, { passive: true });
 
   document.addEventListener("touchend", (event) => {
-    const card = event.target.closest(".cart-item");
+    const card = event.target.closest(".cart-item") || activeTouchCard;
     if (!card) {
       return;
     }
 
     const touchEndX = event.changedTouches[0].clientX;
-    if (touchStartX - touchEndX > 80) {
-      const id = card.dataset.id;
-      const { removed, index } = removeItemFromCart(id);
-      renderCartItems();
-      if (removed) {
-        showToast(`${removed.name} removed`, true, () => {
-          restoreRemovedItem(removed, index);
-          renderCartItems();
-        });
-      }
+    const deltaX = touchStartX - touchEndX;
+
+    if (deltaX > 55) {
+      document.querySelectorAll(".cart-item.swiped").forEach((item) => {
+        if (item !== card) {
+          item.classList.remove("swiped");
+        }
+      });
+      card.classList.add("swiped");
+    } else if (deltaX < -35) {
+      card.classList.remove("swiped");
     }
+
+    activeTouchCard = null;
   }, { passive: true });
 }
 
