@@ -27,7 +27,13 @@ function renderHomeTestimonials(testimonials) {
         <div style="padding:1rem;">
           <h3>${t.name}</h3>
           <p>"${t.message}"</p>
-          ${t.videoUrl ? `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>` : ""}
+          ${
+            t.videoUrl
+              ? t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+                ? `<video src="${t.videoUrl}" controls style="width:100%;max-height:260px;border-radius:10px;margin-top:0.75rem;"></video>`
+                : `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
+              : ""
+          }
         </div>
       </article>
     `)
@@ -50,7 +56,13 @@ function renderPageTestimonials(testimonials) {
         <div style="padding:1rem;">
           <h3>${t.name}</h3>
           <p>"${t.message}"</p>
-          ${t.videoUrl ? `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>` : ""}
+          ${
+            t.videoUrl
+              ? t.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+                ? `<video src="${t.videoUrl}" controls style="width:100%;max-height:320px;border-radius:10px;margin-top:0.75rem;"></video>`
+                : `<p><a href="${t.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
+              : ""
+          }
         </div>
       </article>
     `)
@@ -73,7 +85,13 @@ function renderBlog(posts) {
         <div style="padding:1rem;">
           <h3>${post.title}</h3>
           <p>${post.body}</p>
-          ${post.videoUrl ? `<p><a href="${post.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>` : ""}
+          ${
+            post.videoUrl
+              ? post.videoUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+                ? `<video src="${post.videoUrl}" controls style="width:100%;max-height:360px;border-radius:10px;margin-top:0.75rem;"></video>`
+                : `<p><a href="${post.videoUrl}" target="_blank" rel="noopener" class="btn">Watch Video</a></p>`
+              : ""
+          }
         </div>
       </article>
     `)
