@@ -1,4 +1,4 @@
-import { readContent, saveContent } from "./content.js";
+import { readContent, saveContent } from "./_content-utils.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
