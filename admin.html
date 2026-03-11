@@ -46,6 +46,12 @@
 
       <section class="panel search-panel">
         <input type="search" id="search-input" placeholder="Search by name/category/tag...">
+        <div class="stock-filters" role="tablist" aria-label="Stock filters">
+          <button type="button" class="btn mini filter-tab active" data-stock-filter="all">All</button>
+          <button type="button" class="btn mini filter-tab" data-stock-filter="in">In Stock</button>
+          <button type="button" class="btn mini filter-tab" data-stock-filter="low">Low Stock</button>
+          <button type="button" class="btn mini filter-tab" data-stock-filter="out">Out of Stock</button>
+        </div>
       </section>
 
       <section class="grid">

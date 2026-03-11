@@ -16,7 +16,8 @@ const state = {
   token: localStorage.getItem(TOKEN_KEY) || "",
   catalog: { categories: [], products: [] },
   filteredProducts: [],
-  editingId: null
+  editingId: null,
+  stockFilter: "all"
 };
 
 const loginPanel = document.getElementById("login-panel");
@@ -36,6 +37,7 @@ const closeDrawerBtn = document.getElementById("close-drawer");
 const commitBtn = document.getElementById("commit-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const searchInput = document.getElementById("search-input");
+const stockFilterButtons = Array.from(document.querySelectorAll("button[data-stock-filter]"));
 
 function showSyncing(show, message = "Syncing catalog.json...") {
   syncBar.textContent = message;
@@ -169,15 +171,27 @@ function renderJsonPreview() {
 
 function applyFilter() {
   const query = searchInput.value.trim().toLowerCase();
-  if (!query) {
-    state.filteredProducts = [...state.catalog.products];
-  } else {
-    state.filteredProducts = state.catalog.products.filter((product) => {
-      const tags = Array.isArray(product.tags) ? product.tags.join(" ") : "";
-      const haystack = `${product.name} ${product.category} ${tags}`.toLowerCase();
-      return haystack.includes(query);
-    });
-  }
+  state.filteredProducts = state.catalog.products.filter((product) => {
+    const tags = Array.isArray(product.tags) ? product.tags.join(" ") : "";
+    const haystack = `${product.name} ${product.category} ${tags}`.toLowerCase();
+    const matchesSearch = !query || haystack.includes(query);
+
+    const isOut = Boolean(product.out_of_stock) || product.stock <= 0;
+    const matchesStock = (() => {
+      if (state.stockFilter === "out") {
+        return isOut;
+      }
+      if (state.stockFilter === "in") {
+        return !isOut && product.stock > 10;
+      }
+      if (state.stockFilter === "low") {
+        return !isOut && product.stock > 0 && product.stock <= 10;
+      }
+      return true;
+    })();
+
+    return matchesSearch && matchesStock;
+  });
 
   renderProductsTable();
 }
@@ -485,6 +499,15 @@ logoutBtn.addEventListener("click", () => {
 });
 
 searchInput.addEventListener("input", applyFilter);
+
+stockFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.stockFilter = button.dataset.stockFilter || "all";
+    stockFilterButtons.forEach((entry) => entry.classList.remove("active"));
+    button.classList.add("active");
+    applyFilter();
+  });
+});
 
 renderSchemaForm();
 
