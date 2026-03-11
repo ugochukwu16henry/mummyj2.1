@@ -149,8 +149,33 @@ function setupTestimonialForm() {
   const videoInput = document.getElementById("testimonial-video-file");
   const imagePreview = document.getElementById("testimonial-image-preview");
   const videoPreview = document.getElementById("testimonial-video-preview");
+  const skipMediaBtn = document.getElementById("story-skip-media");
+  const confettiLayer = document.getElementById("testimonial-confetti");
 
   let currentStep = 0;
+
+  function setupConfetti() {
+    if (!confettiLayer || confettiLayer.childElementCount > 0) return;
+    const palette = ["#E07A5F", "#D97706", "#2D9B72", "#FFD89B", "#2D3142"];
+    for (let index = 0; index < 18; index += 1) {
+      const bit = document.createElement("span");
+      bit.className = "confetti-bit";
+      bit.style.left = `${(index * 5.2) + Math.random() * 10}%`;
+      bit.style.background = palette[index % palette.length];
+      bit.style.animationDelay = `${Math.random() * 0.22}s`;
+      confettiLayer.appendChild(bit);
+    }
+  }
+
+  function burstConfetti() {
+    if (!confettiLayer) return;
+    confettiLayer.classList.remove("burst");
+    void confettiLayer.offsetWidth;
+    confettiLayer.classList.add("burst");
+    setTimeout(() => {
+      confettiLayer.classList.remove("burst");
+    }, 1200);
+  }
 
   function updateProgress() {
     if (!progressFill) return;
@@ -179,6 +204,7 @@ function setupTestimonialForm() {
 
   function validateStep(stepIndex) {
     status.textContent = "";
+    status.classList.remove("ok");
 
     if (stepIndex === 0 && !String(messageField?.value || "").trim()) {
       status.textContent = "Please tell us what you loved most before continuing.";
@@ -241,6 +267,10 @@ function setupTestimonialForm() {
     showStep(1, "back");
   });
 
+  skipMediaBtn?.addEventListener("click", () => {
+    form.requestSubmit();
+  });
+
   if (messageField) {
     messageField.addEventListener("input", autoGrowTextarea);
     autoGrowTextarea();
@@ -248,6 +278,7 @@ function setupTestimonialForm() {
 
   bindFilePreview(imageInput, imagePreview, "image");
   bindFilePreview(videoInput, videoPreview, "video");
+  setupConfetti();
   updateProgress();
 
   form.addEventListener("submit", async (event) => {
@@ -312,8 +343,11 @@ function setupTestimonialForm() {
       showStep(0, "back");
       autoGrowTextarea();
       status.textContent = "❤ Thank you! We’re reviewing your story now.";
+      status.classList.add("ok");
+      burstConfetti();
     } catch (error) {
       status.textContent = error.message;
+      status.classList.remove("ok");
     }
   });
 }

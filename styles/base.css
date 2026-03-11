@@ -471,6 +471,17 @@ img {
     min-width: 120px;
 }
 
+#story-skip-media {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(61, 64, 91, 0.2);
+    color: var(--dark);
+}
+
+#story-skip-media:hover,
+#story-skip-media:focus {
+    background: rgba(255, 255, 255, 0.95);
+}
+
 .media-zones {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1881,5 +1892,43 @@ body.force-mobile .remove-item {
         max-width: 100%;
         padding-left: 0.75rem;
         padding-right: 0.75rem;
+    }
+}
+
+.testimonial-status.ok {
+    color: #2d9b72;
+    font-weight: 600;
+}
+
+.confetti-layer {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.confetti-bit {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    border-radius: 2px;
+    opacity: 0;
+}
+
+.confetti-layer.burst .confetti-bit {
+    animation: confettiFall 0.95s ease-out forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-30px) rotate(0deg);
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(320px) rotate(280deg);
+        opacity: 0;
     }
 }
