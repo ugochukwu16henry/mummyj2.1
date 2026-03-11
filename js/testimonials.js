@@ -74,20 +74,31 @@ async function requestUploadUrl(fileName, fileType, folder) {
   return payload;
 }
 
-async function uploadFileToBucket(fileOrBlob, fileName, fileType, folder) {
+async function uploadFileToBucket(fileOrBlob, fileName, fileType, folder, onProgress) {
   const signed = await requestUploadUrl(fileName, fileType, folder);
 
-  const uploadResponse = await fetch(signed.uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": fileType || "application/octet-stream"
-    },
-    body: fileOrBlob
-  });
+  await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", signed.uploadUrl, true);
+    xhr.setRequestHeader("Content-Type", fileType || "application/octet-stream");
 
-  if (!uploadResponse.ok) {
-    throw new Error("Could not upload media file");
-  }
+    xhr.upload.onprogress = (event) => {
+      if (typeof onProgress === "function") {
+        onProgress(event.loaded || 0, event.total || 0);
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Could not upload media file"));
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error("Could not upload media file"));
+      }
+    };
+
+    xhr.send(fileOrBlob);
+  });
 
   return signed.fileUrl;
 }
@@ -224,6 +235,9 @@ function setupTestimonialForm() {
   const videoPreview = document.getElementById("testimonial-video-preview");
   const skipMediaBtn = document.getElementById("story-skip-media");
   const confettiLayer = document.getElementById("testimonial-confetti");
+  const uploadProgress = document.getElementById("story-upload-progress");
+  const uploadProgressFill = document.getElementById("story-upload-fill");
+  const uploadProgressText = document.getElementById("story-upload-text");
 
   let currentStep = 0;
 
@@ -248,6 +262,24 @@ function setupTestimonialForm() {
     setTimeout(() => {
       confettiLayer.classList.remove("burst");
     }, 1200);
+  }
+
+  function updateUploadProgress(percent = 0, label = "Uploading...") {
+    if (!uploadProgress || !uploadProgressFill || !uploadProgressText) {
+      return;
+    }
+    uploadProgress.hidden = false;
+    uploadProgressFill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    uploadProgressText.textContent = label;
+  }
+
+  function hideUploadProgress() {
+    if (!uploadProgress || !uploadProgressFill || !uploadProgressText) {
+      return;
+    }
+    uploadProgress.hidden = true;
+    uploadProgressFill.style.width = "0%";
+    uploadProgressText.textContent = "Preparing upload...";
   }
 
   function updateProgress() {
@@ -352,6 +384,7 @@ function setupTestimonialForm() {
   bindFilePreview(imageInput, imagePreview, "image");
   bindFilePreview(videoInput, videoPreview, "video");
   setupConfetti();
+  hideUploadProgress();
   updateProgress();
 
   form.addEventListener("submit", async (event) => {
@@ -377,6 +410,20 @@ function setupTestimonialForm() {
     try {
       let imageUrl = "";
       let videoUrl = "";
+      const uploadSteps = [imageFile, videoFile].filter(Boolean).length;
+      let completedSteps = 0;
+
+      const makeProgressUpdater = (label) => (loaded, total) => {
+        if (!uploadSteps) return;
+        const base = (completedSteps / uploadSteps) * 100;
+        const fraction = total > 0 ? (loaded / total) : 0;
+        const percent = Math.min(99, Math.round(base + (fraction * (100 / uploadSteps))));
+        updateUploadProgress(percent, `${label} ${percent}%`);
+      };
+
+      if (uploadSteps) {
+        updateUploadProgress(2, "Preparing upload...");
+      }
 
       if (imageFile) {
         const imageBlob = await compressImageForUpload(imageFile);
@@ -384,8 +431,10 @@ function setupTestimonialForm() {
           imageBlob,
           imageFile.name || `photo-${Date.now()}.jpg`,
           "image/jpeg",
-          "testimonials/images"
+          "testimonials/images",
+          makeProgressUpdater("Uploading photo")
         );
+        completedSteps += 1;
       }
 
       if (videoFile) {
@@ -393,8 +442,14 @@ function setupTestimonialForm() {
           videoFile,
           videoFile.name || `video-${Date.now()}.mp4`,
           videoFile.type || "video/mp4",
-          "testimonials/videos"
+          "testimonials/videos",
+          makeProgressUpdater("Uploading video")
         );
+        completedSteps += 1;
+      }
+
+      if (uploadSteps) {
+        updateUploadProgress(100, "Upload complete");
       }
 
       const response = await fetch(`${API_BASE}/testimonials`, {
@@ -429,9 +484,11 @@ function setupTestimonialForm() {
       status.textContent = "❤ Thank you! We’re reviewing your story now.";
       status.classList.add("ok");
       burstConfetti();
+      setTimeout(() => hideUploadProgress(), 500);
     } catch (error) {
       status.textContent = error.message;
       status.classList.remove("ok");
+      hideUploadProgress();
     }
   });
 }
