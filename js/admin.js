@@ -49,6 +49,17 @@ const IMAGE_LIMITS = {
   category: { maxWidth: 720, maxHeight: 720, quality: 0.74 },
   preview: { maxWidth: 360, maxHeight: 360, quality: 0.7 }
 };
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  const power = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / (1024 ** power);
+  return `${value.toFixed(power === 0 ? 0 : 1)} ${units[power]}`;
+}
 
 async function fileToDataUrl(file) {
   if (!file) {
@@ -94,6 +105,10 @@ async function canvasToDataUrl(canvas, mimeType, quality) {
 async function optimizeImageFile(file, profile = "product") {
   if (!file) {
     return "";
+  }
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`Image is too large (${formatBytes(file.size)}). Max allowed is ${formatBytes(MAX_UPLOAD_BYTES)}.`);
   }
 
   const { maxWidth, maxHeight, quality } = IMAGE_LIMITS[profile] || IMAGE_LIMITS.product;
@@ -442,7 +457,7 @@ productForm.addEventListener("submit", async (event) => {
       product.image = await optimizeImageFile(uploadedImage, "product");
     }
   } catch (error) {
-    showSyncing(true, `Image upload failed: ${error.message}`);
+    showSyncing(true, `Image upload failed: ${error.message} Try a smaller image.`);
     setTimeout(() => showSyncing(false), 1800);
     return;
   }
@@ -538,7 +553,7 @@ addCategoryForm.addEventListener("submit", async (event) => {
       state.catalog.category_images[value] = await optimizeImageFile(uploaded, "category");
     }
   } catch (error) {
-    showSyncing(true, `Category image upload failed: ${error.message}`);
+    showSyncing(true, `Category image upload failed: ${error.message} Try a smaller image.`);
     setTimeout(() => showSyncing(false), 1800);
   }
 
@@ -572,7 +587,7 @@ categoryList.addEventListener("change", async (event) => {
     showSyncing(true, `Updated image for ${category}. Click Commit Changes to publish.`);
     setTimeout(() => showSyncing(false), 1500);
   } catch (error) {
-    showSyncing(true, `Image update failed: ${error.message}`);
+    showSyncing(true, `Image update failed: ${error.message} Try a smaller image.`);
     setTimeout(() => showSyncing(false), 1800);
   }
 });
