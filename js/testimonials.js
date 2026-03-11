@@ -19,6 +19,15 @@ function fileToDataUrl(file) {
   });
 }
 
+function validateFileSize(file, maxBytes) {
+  if (!file) return null;
+  if (file.size > maxBytes) {
+    const mb = (maxBytes / (1024 * 1024)).toFixed(1);
+    return `File is too large. Max allowed size is ${mb} MB.`;
+  }
+  return null;
+}
+
 function renderHomeTestimonials(testimonials) {
   const container = document.getElementById("home-testimonials");
   if (!container) return;
@@ -143,6 +152,13 @@ function setupTestimonialForm() {
 
     if (!name || !message) {
       status.textContent = "Please enter your name and testimony.";
+      return;
+    }
+
+    const imageError = validateFileSize(imageFile, 2 * 1024 * 1024); // 2MB
+    const videoError = validateFileSize(videoFile, 8 * 1024 * 1024); // 8MB
+    if (imageError || videoError) {
+      status.textContent = imageError || videoError;
       return;
     }
 
