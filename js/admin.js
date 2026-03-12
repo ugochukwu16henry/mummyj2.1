@@ -21,7 +21,8 @@ const state = {
   catalog: { categories: [], products: [], category_images: {}, orders: [] },
   filteredProducts: [],
   editingId: null,
-  stockFilter: "all"
+  stockFilter: "all",
+  currentAdminEmail: "admin@mummyj2treats.com"
 };
 
 const loginPanel = document.getElementById("login-panel");
@@ -379,7 +380,7 @@ function renderOrders() {
   orders.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
   if (!orders.length) {
-    ordersTable.innerHTML = '<tr><td colspan="14">No customer orders yet.</td></tr>';
+    ordersTable.innerHTML = '<tr><td colspan="15">No customer orders yet.</td></tr>';
     return;
   }
 
@@ -399,12 +400,50 @@ function renderOrders() {
           ? `<a class="receipt-link" href="${order.receiptImage}" target="_blank" rel="noopener noreferrer">View</a>${String(order.receiptImage).startsWith("data:image") ? `<img class="receipt-thumb" src="${order.receiptImage}" alt="Receipt proof">` : ""}`
           : "-"}
       </td>
+      <td>
+        ${String(order.status || "").toLowerCase() === "awaiting_bank_transfer"
+          ? `<button type="button" class="btn mini primary" data-approve-order="${order.orderId || ""}">Approve Payment</button>`
+          : "-"}
+      </td>
       <td>${order.qty || 1}</td>
       <td>${order.date || "-"}</td>
       <td>${order.time || "-"}</td>
       <td>${order.notes || "-"}</td>
     </tr>
   `).join("");
+}
+
+async function approveOrderPayment(orderId) {
+  const orders = Array.isArray(state.catalog.orders) ? [...state.catalog.orders] : [];
+  const targetIndex = orders.findIndex((entry) => String(entry.orderId) === String(orderId));
+  if (targetIndex < 0) {
+    throw new Error("Order not found");
+  }
+
+  const target = orders[targetIndex];
+  const targetStatus = String(target.status || "").toLowerCase();
+  if (targetStatus !== "awaiting_bank_transfer") {
+    throw new Error("Only pending bank transfer orders can be approved");
+  }
+
+  const approvedBy = state.currentAdminEmail || "admin@mummyj2treats.com";
+  const approvedAt = new Date().toISOString();
+
+  orders[targetIndex] = {
+    ...target,
+    status: "Confirmed",
+    approvedAt,
+    approvedBy
+  };
+
+  state.catalog = {
+    ...state.catalog,
+    orders
+  };
+
+  renderOrders();
+  renderJsonPreview();
+  await saveCatalog();
 }
 
 function renderCategories() {
@@ -532,6 +571,7 @@ async function loadAccount() {
     const span = accountEmail.querySelector("span");
     if (span && payload?.email) {
       span.textContent = payload.email;
+      state.currentAdminEmail = payload.email;
     }
   } catch {
     // ignore – account section is optional
@@ -683,6 +723,7 @@ loginForm.addEventListener("submit", async (event) => {
   loginError.textContent = "";
   try {
     await login(email, password);
+    state.currentAdminEmail = email || state.currentAdminEmail;
     showDashboard();
     await loadCatalog();
   } catch (error) {
@@ -1330,6 +1371,36 @@ if (exportCatalogBtn) {
 if (exportContentBtn) {
   exportContentBtn.addEventListener("click", () => {
     triggerDownload("/admin/content/export", "content.json");
+  });
+}
+
+if (ordersTable) {
+  ordersTable.addEventListener("click", async (event) => {
+    const approveButton = event.target.closest("button[data-approve-order]");
+    if (!approveButton) {
+      return;
+    }
+
+    const orderId = approveButton.dataset.approveOrder;
+    if (!orderId) {
+      return;
+    }
+
+    const confirmed = window.confirm("Approve this bank transfer payment and mark order as Confirmed?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      approveButton.disabled = true;
+      await approveOrderPayment(orderId);
+      showSyncing(true, "Payment approved and synced to catalog.json");
+      setTimeout(() => showSyncing(false), 1400);
+    } catch (error) {
+      approveButton.disabled = false;
+      showSyncing(true, `Could not approve payment: ${error.message}`);
+      setTimeout(() => showSyncing(false), 1800);
+    }
   });
 }
 
