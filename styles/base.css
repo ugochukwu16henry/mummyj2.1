@@ -1827,7 +1827,7 @@ body.force-mobile .remove-item {
     body.cart-screen .cart-item-content,
     body.force-mobile .cart-item-content {
         min-width: 0;
-        overflow: hidden;
+        overflow: visible;
     }
 
     body.cart-screen .cart-item-top,
@@ -1875,6 +1875,21 @@ body.force-mobile .remove-item {
         align-items: center;
         flex-wrap: wrap;
         gap: 0.55rem;
+    }
+
+    body.cart-screen .remove-item,
+    body.force-mobile .remove-item {
+        display: inline-block;
+    }
+
+    body.cart-screen .swipe-delete,
+    body.force-mobile .swipe-delete {
+        display: none;
+    }
+
+    body.cart-screen .cart-item.swiped .cart-item-shell,
+    body.force-mobile .cart-item.swiped .cart-item-shell {
+        transform: none;
     }
 
     body.cart-screen .qty-control,
@@ -1939,6 +1954,11 @@ body.force-mobile .remove-item {
         display: grid;
         grid-template-columns: 1fr;
         gap: 0.35rem;
+    }
+
+    body.cart-screen .cart-item-top > div,
+    body.force-mobile .cart-item-top > div {
+        min-width: 0;
     }
 
     body.cart-screen .cart-price,

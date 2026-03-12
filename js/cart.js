@@ -18,6 +18,7 @@ const TAX_RATE = 0.075;
 let menuItems = [];
 let undoTimer = null;
 let touchStartX = 0;
+let touchStartY = 0;
 let activeTouchCard = null;
 let previousTotal = 0;
 
@@ -349,6 +350,7 @@ function attachCartEvents() {
       return;
     }
     touchStartX = event.changedTouches[0].clientX;
+    touchStartY = event.changedTouches[0].clientY;
     activeTouchCard = card;
   }, { passive: true });
 
@@ -358,8 +360,23 @@ function attachCartEvents() {
       return;
     }
 
+    const isMobileLayout = window.matchMedia("(max-width: 1100px)").matches || document.body.classList.contains("force-mobile");
+    if (isMobileLayout) {
+      card.classList.remove("swiped");
+      activeTouchCard = null;
+      return;
+    }
+
     const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
     const deltaX = touchStartX - touchEndX;
+    const deltaY = touchStartY - touchEndY;
+
+    const mostlyHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+    if (!mostlyHorizontal) {
+      activeTouchCard = null;
+      return;
+    }
 
     if (deltaX > 55) {
       document.querySelectorAll(".cart-item.swiped").forEach((item) => {
