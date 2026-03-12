@@ -139,22 +139,6 @@
       "order_only": false
     },
     {
-      "id": "p008",
-      "name": "Spring Rolls (10)",
-      "price": 4500,
-      "category": "Small Chops",
-      "tags": [
-        "small chops",
-        "party"
-      ],
-      "stock": 30,
-      "description": "Veggies and chicken",
-      "image": "images/springroll.jpg",
-      "last_updated": "2026-03-11",
-      "out_of_stock": false,
-      "order_only": true
-    },
-    {
       "id": "p010",
       "name": "Mosa (10)",
       "price": 3000,
