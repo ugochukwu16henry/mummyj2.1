@@ -553,19 +553,20 @@ function renderOrders() {
       <td>
         ${(() => {
           const status = String(order.status || "").toLowerCase();
+          const deleteReceiptButton = order.receiptImage
+            ? `<button type="button" class="btn mini danger" data-delete-receipt="${order.orderId || ""}">Delete Receipt</button>`
+            : "";
+
           if (status === "awaiting_bank_transfer") {
-            return `<div class="row-actions"><button type="button" class="btn mini primary" data-approve-send-order="${order.orderId || ""}">Approve + Send WA</button><button type="button" class="btn mini" data-approve-order="${order.orderId || ""}">Approve Only</button><button type="button" class="btn mini danger" data-flag-order="${order.orderId || ""}">Flag</button></div>`;
+            return `<div class="row-actions"><button type="button" class="btn mini primary" data-approve-send-order="${order.orderId || ""}">Approve + Send WA</button><button type="button" class="btn mini" data-approve-order="${order.orderId || ""}">Approve Only</button><button type="button" class="btn mini danger" data-flag-order="${order.orderId || ""}">Flag</button>${deleteReceiptButton}</div>`;
           }
           if (status === "flagged") {
-            return `<div class="row-actions"><button type="button" class="btn mini" data-unflag-order="${order.orderId || ""}">Move to Pending</button></div>`;
+            return `<div class="row-actions"><button type="button" class="btn mini" data-unflag-order="${order.orderId || ""}">Move to Pending</button>${deleteReceiptButton}</div>`;
           }
           if (status === "confirmed" || status === "paid") {
-            const deleteReceiptButton = order.receiptImage
-              ? `<button type="button" class="btn mini danger" data-delete-receipt="${order.orderId || ""}">Delete Receipt</button>`
-              : "";
             return `<div class="row-actions"><button type="button" class="btn mini" data-send-whatsapp="${order.orderId || ""}">WhatsApp</button><button type="button" class="btn mini" data-send-email="${order.orderId || ""}">Email</button><button type="button" class="btn mini" data-print-receipt="${order.orderId || ""}">PDF</button>${deleteReceiptButton}</div>`;
           }
-          return "-";
+          return deleteReceiptButton || "-";
         })()}
       </td>
       <td>${order.qty || 1}</td>
