@@ -377,12 +377,19 @@ function attachCartEvents() {
 }
 
 async function loadMenuData() {
-  const candidatePaths = [
-    "data/catalog.json",
-    "./data/catalog.json",
-    "data/menu.json",
-    "./data/menu.json"
-  ];
+  // Prefer live catalog from backend so stock/order-only flags match admin dashboard
+  try {
+    const apiRes = await fetch("/api/catalog-public", { cache: "no-store" });
+    if (apiRes.ok) {
+      const rawPayload = await apiRes.json();
+      menuItems = normalizeProducts(rawPayload);
+      return;
+    }
+  } catch {
+    // fall through to static JSON
+  }
+
+  const candidatePaths = ["data/catalog.json", "./data/catalog.json", "data/menu.json", "./data/menu.json"];
 
   let response = null;
   for (const candidate of candidatePaths) {

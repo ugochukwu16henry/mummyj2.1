@@ -469,6 +469,16 @@ app.get("/api/catalog", authMiddleware, async (_req, res) => {
   }
 });
 
+// Public catalog endpoint for storefront (no auth, read-only)
+app.get("/api/catalog-public", async (_req, res) => {
+  try {
+    const catalog = await readCatalog();
+    res.json(catalog);
+  } catch (error) {
+    res.status(500).json({ error: "Could not read catalog.json" });
+  }
+});
+
 app.put("/api/catalog", authMiddleware, async (req, res) => {
   try {
     await writeCatalog(req.body);
