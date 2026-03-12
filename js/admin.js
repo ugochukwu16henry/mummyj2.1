@@ -22,6 +22,7 @@ const state = {
   filteredProducts: [],
   editingId: null,
   stockFilter: "all",
+  orderFilter: "all",
   currentAdminEmail: "admin@mummyj2treats.com"
 };
 
@@ -57,6 +58,8 @@ const blogImageClearBtn = document.getElementById("blog-image-clear");
 const blogPostsAdmin = document.getElementById("blog-posts-admin");
 const ordersTable = document.getElementById("orders-table");
 const ordersPanel = document.getElementById("orders-panel");
+const ordersFilterButtons = Array.from(document.querySelectorAll("button[data-order-filter]"));
+const ordersQueueMeta = document.getElementById("orders-queue-meta");
 const exportCatalogBtn = document.getElementById("export-catalog-btn");
 const exportContentBtn = document.getElementById("export-content-btn");
 
@@ -376,11 +379,44 @@ function renderOrders() {
     return;
   }
 
-  const orders = Array.isArray(state.catalog.orders) ? [...state.catalog.orders] : [];
-  orders.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  const allOrders = Array.isArray(state.catalog.orders) ? [...state.catalog.orders] : [];
+  allOrders.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+
+  const pendingCount = allOrders.filter((order) => String(order.status || "").toLowerCase() === "awaiting_bank_transfer").length;
+  const flaggedCount = allOrders.filter((order) => String(order.status || "").toLowerCase() === "flagged").length;
+  const confirmedCount = allOrders.filter((order) => {
+    const status = String(order.status || "").toLowerCase();
+    return status === "confirmed" || status === "paid";
+  }).length;
+
+  const orders = allOrders.filter((order) => {
+    const status = String(order.status || "").toLowerCase();
+    if (state.orderFilter === "pending_verification") {
+      return status === "awaiting_bank_transfer";
+    }
+    if (state.orderFilter === "flagged") {
+      return status === "flagged";
+    }
+    if (state.orderFilter === "confirmed") {
+      return status === "confirmed" || status === "paid";
+    }
+    return true;
+  });
+
+  if (ordersQueueMeta) {
+    if (state.orderFilter === "pending_verification") {
+      ordersQueueMeta.textContent = `Pending verification: ${pendingCount}`;
+    } else if (state.orderFilter === "flagged") {
+      ordersQueueMeta.textContent = `Flagged orders: ${flaggedCount}`;
+    } else if (state.orderFilter === "confirmed") {
+      ordersQueueMeta.textContent = `Confirmed orders: ${confirmedCount}`;
+    } else {
+      ordersQueueMeta.textContent = `All orders: ${allOrders.length} • Pending: ${pendingCount} • Flagged: ${flaggedCount}`;
+    }
+  }
 
   if (!orders.length) {
-    ordersTable.innerHTML = '<tr><td colspan="15">No customer orders yet.</td></tr>';
+    ordersTable.innerHTML = '<tr><td colspan="15">No orders found for this filter.</td></tr>';
     return;
   }
 
@@ -401,9 +437,16 @@ function renderOrders() {
           : "-"}
       </td>
       <td>
-        ${String(order.status || "").toLowerCase() === "awaiting_bank_transfer"
-          ? `<button type="button" class="btn mini primary" data-approve-order="${order.orderId || ""}">Approve Payment</button>`
-          : "-"}
+        ${(() => {
+          const status = String(order.status || "").toLowerCase();
+          if (status === "awaiting_bank_transfer") {
+            return `<div class="row-actions"><button type="button" class="btn mini primary" data-approve-order="${order.orderId || ""}">Approve</button><button type="button" class="btn mini danger" data-flag-order="${order.orderId || ""}">Flag</button></div>`;
+          }
+          if (status === "flagged") {
+            return `<div class="row-actions"><button type="button" class="btn mini" data-unflag-order="${order.orderId || ""}">Move to Pending</button></div>`;
+          }
+          return "-";
+        })()}
       </td>
       <td>${order.qty || 1}</td>
       <td>${order.date || "-"}</td>
@@ -436,6 +479,35 @@ async function approveOrderPayment(orderId) {
     approvedBy
   };
 
+  state.catalog = {
+    ...state.catalog,
+    orders
+  };
+
+  renderOrders();
+  renderJsonPreview();
+  await saveCatalog();
+}
+
+async function updateOrderStatus(orderId, nextStatus) {
+  const orders = Array.isArray(state.catalog.orders) ? [...state.catalog.orders] : [];
+  const targetIndex = orders.findIndex((entry) => String(entry.orderId) === String(orderId));
+  if (targetIndex < 0) {
+    throw new Error("Order not found");
+  }
+
+  const target = orders[targetIndex];
+  const updated = {
+    ...target,
+    status: nextStatus
+  };
+
+  if (nextStatus === "flagged") {
+    updated.flaggedAt = new Date().toISOString();
+    updated.flaggedBy = state.currentAdminEmail || "admin@mummyj2treats.com";
+  }
+
+  orders[targetIndex] = updated;
   state.catalog = {
     ...state.catalog,
     orders
@@ -1377,6 +1449,57 @@ if (exportContentBtn) {
 if (ordersTable) {
   ordersTable.addEventListener("click", async (event) => {
     const approveButton = event.target.closest("button[data-approve-order]");
+    const flagButton = event.target.closest("button[data-flag-order]");
+    const unflagButton = event.target.closest("button[data-unflag-order]");
+
+    if (flagButton) {
+      const orderId = flagButton.dataset.flagOrder;
+      if (!orderId) {
+        return;
+      }
+
+      const confirmed = window.confirm("Flag this order for manual review?");
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        flagButton.disabled = true;
+        await updateOrderStatus(orderId, "flagged");
+        showSyncing(true, "Order flagged for review and synced");
+        setTimeout(() => showSyncing(false), 1400);
+      } catch (error) {
+        flagButton.disabled = false;
+        showSyncing(true, `Could not flag order: ${error.message}`);
+        setTimeout(() => showSyncing(false), 1800);
+      }
+      return;
+    }
+
+    if (unflagButton) {
+      const orderId = unflagButton.dataset.unflagOrder;
+      if (!orderId) {
+        return;
+      }
+
+      const confirmed = window.confirm("Move this flagged order back to pending verification?");
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+        unflagButton.disabled = true;
+        await updateOrderStatus(orderId, "awaiting_bank_transfer");
+        showSyncing(true, "Order moved to pending verification and synced");
+        setTimeout(() => showSyncing(false), 1400);
+      } catch (error) {
+        unflagButton.disabled = false;
+        showSyncing(true, `Could not update order: ${error.message}`);
+        setTimeout(() => showSyncing(false), 1800);
+      }
+      return;
+    }
+
     if (!approveButton) {
       return;
     }
@@ -1412,6 +1535,15 @@ stockFilterButtons.forEach((button) => {
     stockFilterButtons.forEach((entry) => entry.classList.remove("active"));
     button.classList.add("active");
     applyFilter();
+  });
+});
+
+ordersFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.orderFilter = button.dataset.orderFilter || "all";
+    ordersFilterButtons.forEach((entry) => entry.classList.remove("active"));
+    button.classList.add("active");
+    renderOrders();
   });
 });
 

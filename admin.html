@@ -195,6 +195,13 @@
 
     <section class="panel orders-panel" id="orders-panel" hidden>
       <h2>Customer Orders</h2>
+      <div class="orders-toolbar" role="tablist" aria-label="Order filters">
+        <button type="button" class="btn mini filter-tab active" data-order-filter="all">All</button>
+        <button type="button" class="btn mini filter-tab" data-order-filter="pending_verification">Pending Verification</button>
+        <button type="button" class="btn mini filter-tab" data-order-filter="flagged">Flagged</button>
+        <button type="button" class="btn mini filter-tab" data-order-filter="confirmed">Confirmed</button>
+      </div>
+      <p id="orders-queue-meta" class="orders-queue-meta">Showing all orders</p>
       <div class="table-wrap">
         <table>
           <thead>
