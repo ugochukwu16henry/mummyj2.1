@@ -1849,8 +1849,8 @@ body.force-mobile .remove-item {
     body.cart-screen .cart-meta,
     body.force-mobile .cart-item-top h3,
     body.force-mobile .cart-meta {
-        overflow-wrap: anywhere;
-        word-break: break-word;
+        overflow-wrap: break-word;
+        word-break: normal;
     }
 
     body.cart-screen .cart-item-top h3,
@@ -1871,8 +1871,10 @@ body.force-mobile .remove-item {
     body.force-mobile .cart-item-actions {
         width: 100%;
         margin-top: 0.55rem;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.55rem;
     }
 
     body.cart-screen .qty-control,
@@ -1930,6 +1932,24 @@ body.force-mobile .remove-item {
 
     body.cart-screen .cart-item-top h3 {
         font-size: 0.98rem;
+    }
+
+    body.cart-screen .cart-item-top,
+    body.force-mobile .cart-item-top {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    body.cart-screen .cart-price,
+    body.force-mobile .cart-price {
+        justify-self: start;
+    }
+
+    body.cart-screen .save-later,
+    body.force-mobile .save-later {
+        font-size: 0.9rem;
+        line-height: 1.2;
     }
 
     body.cart-screen .mobile-checkout-bar {
