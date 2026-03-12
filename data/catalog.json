@@ -134,9 +134,9 @@
       "stock": 30,
       "description": "Veggies and chicken",
       "image": "images/springroll.jpg",
-      "last_updated": "2026-03-11",
-      "out_of_stock": false,
-      "order_only": true
+      "last_updated": "2026-03-12",
+      "out_of_stock": true,
+      "order_only": false
     },
     {
       "id": "p009",
