@@ -430,6 +430,10 @@ function openDrawer(product) {
   drawer.classList.add("open");
   drawer.setAttribute("aria-hidden", "false");
   document.getElementById("drawer-price").value = String(product.price);
+  const drawerStockInput = document.getElementById("drawer-stock");
+  if (drawerStockInput) {
+    drawerStockInput.value = String(product.stock ?? 0);
+  }
   document.getElementById("drawer-category").value = product.category;
   document.getElementById("drawer-image").value = product.image || "";
   const drawerImageUpload = document.getElementById("drawer-image-upload");
@@ -443,6 +447,10 @@ function openDrawer(product) {
   }
   document.getElementById("drawer-out-of-stock").checked = Boolean(product.out_of_stock);
   document.getElementById("drawer-order-only").checked = Boolean(product.order_only);
+  const drawerStatus = document.getElementById("drawer-stock-status");
+  if (drawerStatus) {
+    drawerStatus.textContent = `Current status: ${getStockLabel(product)}`;
+  }
   drawerPreview.textContent = JSON.stringify(
     {
       before: {
@@ -934,15 +942,27 @@ drawerForm.addEventListener("input", () => {
   }
 
   const nextPrice = Number(document.getElementById("drawer-price").value || product.price);
+  const nextStock = Number(document.getElementById("drawer-stock")?.value || product.stock || 0);
   const nextCategory = document.getElementById("drawer-category").value || product.category;
   const nextImage = document.getElementById("drawer-image").value || product.image;
   const nextOutOfStock = document.getElementById("drawer-out-of-stock").checked;
   const nextOrderOnly = document.getElementById("drawer-order-only").checked;
 
+  const drawerStatus = document.getElementById("drawer-stock-status");
+  if (drawerStatus) {
+    drawerStatus.textContent = `Current status: ${getStockLabel({
+      ...product,
+      stock: nextStock,
+      out_of_stock: nextOutOfStock,
+      order_only: nextOrderOnly
+    })}`;
+  }
+
   drawerPreview.textContent = JSON.stringify(
     {
       before: {
         price: product.price,
+        stock: product.stock,
         category: product.category,
         image: product.image,
         out_of_stock: Boolean(product.out_of_stock),
@@ -950,6 +970,7 @@ drawerForm.addEventListener("input", () => {
       },
       after: {
         price: nextPrice,
+        stock: nextStock,
         category: nextCategory,
         image: nextImage,
         out_of_stock: nextOutOfStock,
@@ -999,6 +1020,7 @@ drawerForm.addEventListener("submit", async (event) => {
   }
 
   const nextPrice = Number(document.getElementById("drawer-price").value || 0);
+  const nextStock = Number(document.getElementById("drawer-stock")?.value || 0);
   const nextCategory = document.getElementById("drawer-category").value.trim();
   const drawerImageInput = document.getElementById("drawer-image");
   const drawerImageUpload = document.getElementById("drawer-image-upload");
@@ -1026,6 +1048,7 @@ drawerForm.addEventListener("submit", async (event) => {
     return {
       ...product,
       price: nextPrice,
+      stock: nextStock,
       category: nextCategory,
       image: nextImage || product.image,
       out_of_stock: nextOutOfStock,

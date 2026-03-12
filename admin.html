@@ -165,6 +165,9 @@
         <label>Price
           <input type="number" id="drawer-price" min="0" step="100">
         </label>
+        <label>Stock
+          <input type="number" id="drawer-stock" min="0" step="1">
+        </label>
         <label>Category
           <input type="text" id="drawer-category">
         </label>
@@ -183,6 +186,7 @@
           <input type="checkbox" id="drawer-order-only">
           Mark as Order Only
         </label>
+        <p id="drawer-stock-status" class="account-message" aria-live="polite"></p>
         <button class="btn primary" type="submit">Apply Change</button>
       </form>
       <h4>Change Preview</h4>
