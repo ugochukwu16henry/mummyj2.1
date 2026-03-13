@@ -144,31 +144,17 @@
   },
   "orders": [
     {
-      "orderId": "ORQ-1773413359514-82",
-      "orderRequestId": "ORQ-1773413359514-82",
-      "orderSource": "",
+      "orderId": "ORD-1773413791830",
       "productId": "p2001",
-      "productName": "Banana Bread",
-      "qty": 2,
+      "productName": "Banana Bread x2, Small chops x2",
+      "qty": 4,
       "date": "2026-03-13",
       "time": "15:49",
-      "customerName": "Nancy",
-      "customerEmail": "",
+      "customerName": "NANCY UKAEGBU",
       "phone": "+2349030314138",
-      "notes": "",
-      "status": "order_request_submitted",
-      "paymentStatus": "unpaid",
-      "paymentMethod": "",
-      "amountDue": 0,
-      "bankName": "",
-      "bankAccountNumber": "",
-      "bankAccountName": "",
-      "bankReference": "",
-      "receiptImage": "",
-      "linkedOrderRequestIds": [],
-      "linkedOrderRequests": [],
-      "orderLines": [],
-      "createdAt": "2026-03-13T14:49:19.514Z"
+      "notes": "Bank transfer submitted by NANCY UKAEGBU. Items: Banana Bread x2 | Small chops x2 • Linked order request IDs: ORQ-1773413359514-82 • Requested schedule: ORQ-1773413359514-82 (Banana Bread x2 - 2026-03-13 15:49)",
+      "status": "awaiting_bank_transfer",
+      "createdAt": "2026-03-13T14:56:31.830Z"
     }
   ]
 }
