@@ -106,38 +106,6 @@
       "last_updated": "2026-03-13"
     },
     {
-      "id": "p002",
-      "name": "Red Velvet Cake",
-      "price": 20000,
-      "category": "Cakes",
-      "tags": [
-        "cake",
-        "premium"
-      ],
-      "stock": 10,
-      "description": "Classic cream cheese frosting",
-      "image": "images/cake2.jpg",
-      "last_updated": "2026-03-11",
-      "out_of_stock": true,
-      "order_only": false
-    },
-    {
-      "id": "p003",
-      "name": "Vanilla Berry Cake",
-      "price": 17000,
-      "category": "Cakes",
-      "tags": [
-        "cake",
-        "berry"
-      ],
-      "stock": 8,
-      "description": "Fresh berries and vanilla sponge",
-      "image": "images/cake3.jpg",
-      "last_updated": "2026-03-11",
-      "out_of_stock": true,
-      "order_only": false
-    },
-    {
       "id": "p011",
       "name": "Parfait (Large)",
       "price": 5000,
