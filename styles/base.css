@@ -1,4 +1,4 @@
-/* Mummy J’s Treats – Pure CSS, no frameworks */
+﻿/* Mummy Jâ€™s Treats â€“ Pure CSS, no frameworks */
 :root {
     --primary: #E07A5F;
     --secondary: #D97706;
@@ -1438,6 +1438,11 @@ body.cart-screen.checkout-focus .cart-link {
     display: none;
 }
 
+/* Hide WhatsApp float when checkout panel is open - prevents covering total / Confirm Payment */
+body.cart-screen.checkout-focus .whatsapp-float {
+    display: none;
+}
+
 .trust-badges {
     display: flex;
     flex-wrap: wrap;
@@ -1675,6 +1680,11 @@ body.force-mobile .mobile-checkout-bar {
     flex-direction: column;
 }
 
+    /* On cart page with force-mobile, push WhatsApp float above the fixed mobile checkout bar */
+    body.force-mobile.cart-screen .whatsapp-float {
+        bottom: 8rem;
+    }
+
 body.force-mobile .cart-items {
     gap: 0;
 }
@@ -1830,6 +1840,11 @@ body.force-mobile .remove-item {
     .mobile-checkout-bar {
         display: flex;
         flex-direction: column;
+    }
+
+    /* Push WhatsApp float above the fixed mobile checkout bar on cart page */
+    body.cart-screen .whatsapp-float {
+        bottom: 8rem;
     }
 
     .cart-items {
