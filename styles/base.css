@@ -259,6 +259,51 @@ h2 {
     -webkit-line-clamp: 7;
 }
 
+@media (min-width: 1101px) {
+    #testimonials-grid.stories-grid,
+    #blog-list.stories-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.4rem;
+    }
+
+    #testimonials-grid .story-card.is-featured,
+    #blog-list .story-card.is-featured {
+        grid-row: span 2;
+    }
+
+    #testimonials-grid .story-card.is-featured .story-card-media {
+        aspect-ratio: 4 / 5;
+    }
+
+    #blog-list .story-card.is-featured .story-card-media {
+        aspect-ratio: 16 / 9;
+    }
+
+    #testimonials-grid .story-card.is-featured .story-card-body,
+    #blog-list .story-card.is-featured .story-card-body {
+        padding: 1.2rem 1.2rem 1.3rem;
+        gap: 0.65rem;
+    }
+
+    #testimonials-grid .story-card.is-featured .story-card-title,
+    #blog-list .story-card.is-featured .story-card-title {
+        font-size: 1.35rem;
+    }
+
+    #testimonials-grid .story-card.is-featured .story-card-copy,
+    #blog-list .story-card.is-featured .story-card-copy {
+        font-size: 1.02rem;
+    }
+
+    #testimonials-grid .story-card.is-featured .story-card-copy {
+        -webkit-line-clamp: 10;
+    }
+
+    #blog-list .story-card.is-featured .story-card-copy {
+        -webkit-line-clamp: 9;
+    }
+}
+
 .hero-text {
     position: absolute;
     top: 50%;

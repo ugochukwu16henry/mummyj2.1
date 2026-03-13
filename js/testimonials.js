@@ -141,8 +141,8 @@ function renderHomeTestimonials(testimonials) {
 
   const featured = testimonials.slice(0, 3);
   container.innerHTML = featured
-    .map((t) => `
-      <article class="card story-card testimonial-card" aria-label="Testimony from ${escapeHtml(t.name)}">
+    .map((t, index) => `
+      <article class="card story-card testimonial-card ${index === 0 ? "is-featured" : ""}" aria-label="Testimony from ${escapeHtml(t.name)}">
         <div class="story-card-media">
           ${t.imageUrl
             ? `<img src="${t.imageUrl}" alt="Photo of ${escapeHtml(t.name)}" loading="lazy">`
@@ -167,8 +167,8 @@ function renderPageTestimonials(testimonials) {
   }
 
   container.innerHTML = testimonials
-    .map((t) => `
-      <article class="card story-card testimonial-card" aria-label="Testimony from ${escapeHtml(t.name)}">
+    .map((t, index) => `
+      <article class="card story-card testimonial-card ${index === 0 ? "is-featured" : ""}" aria-label="Testimony from ${escapeHtml(t.name)}">
         <div class="story-card-media">
           ${t.imageUrl
             ? `<img src="${t.imageUrl}" alt="Photo of ${escapeHtml(t.name)}" loading="lazy">`
@@ -193,8 +193,8 @@ function renderBlog(posts) {
   }
 
   container.innerHTML = posts
-    .map((post) => `
-      <article class="card story-card blog-story-card" aria-label="${escapeHtml(post.title)}">
+    .map((post, index) => `
+      <article class="card story-card blog-story-card ${index === 0 ? "is-featured" : ""}" aria-label="${escapeHtml(post.title)}">
         <div class="story-card-media story-card-media-landscape">
           ${post.imageUrl
             ? `<img src="${post.imageUrl}" alt="${escapeHtml(post.title)}" loading="lazy">`
