@@ -19,10 +19,6 @@ const API_BASE =
 const ADMIN_WHATSAPP_NUMBER = "2349068042947";
 const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
 
-const SHIPPING_THRESHOLD = 15000;
-const SHIPPING_FEE = 2500;
-const TAX_RATE = 0.075;
-
 let menuItems = [];
 let undoTimer = null;
 let touchStartX = 0;
@@ -345,42 +341,14 @@ function hideToast() {
 
 function calcTotals(items) {
   const subtotal = items.reduce((sum, item) => sum + parsePrice(item.price) * (Number(item.qty) || 1), 0);
-  const shipping = subtotal === 0 ? 0 : subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + shipping + tax;
-  const remainingForFreeShipping = Math.max(0, SHIPPING_THRESHOLD - subtotal);
-  return { subtotal, shipping, tax, total, remainingForFreeShipping };
+  return { subtotal, total: subtotal };
 }
 
 function updateSummary(items) {
   const totals = calcTotals(items);
 
   document.getElementById("subtotal").textContent = formatNaira(totals.subtotal);
-  document.getElementById("shipping").textContent = totals.shipping === 0 ? "Free" : formatNaira(totals.shipping);
-  document.getElementById("tax").textContent = formatNaira(totals.tax);
   animateCurrencyChange("order-total", previousTotal, totals.total);
-
-  const progress = document.getElementById("shipping-progress-fill");
-  const progressText = document.getElementById("shipping-progress-text");
-  const progressPercent = Math.min(100, (totals.subtotal / SHIPPING_THRESHOLD) * 100);
-  if (progress) {
-    progress.style.width = `${progressPercent}%`;
-  }
-  const progressMessage = totals.remainingForFreeShipping > 0
-    ? `Add ${formatNaira(totals.remainingForFreeShipping)} for free shipping`
-    : "You unlocked free shipping";
-  if (progressText) {
-    progressText.textContent = progressMessage;
-  }
-
-  const mobileProgress = document.getElementById("mobile-shipping-progress-fill");
-  const mobileProgressText = document.getElementById("mobile-shipping-progress-text");
-  if (mobileProgress) {
-    mobileProgress.style.width = `${progressPercent}%`;
-  }
-  if (mobileProgressText) {
-    mobileProgressText.textContent = progressMessage;
-  }
 
   const mobileStickyTotal = document.getElementById("mobile-subtotal");
   if (mobileStickyTotal) {
