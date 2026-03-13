@@ -144,21 +144,6 @@
   },
   "orders": [
     {
-      "orderId": "ORD-1773349089323",
-      "productId": "p011",
-      "productName": "2 items",
-      "qty": 4,
-      "date": "",
-      "time": "",
-      "customerName": "John",
-      "phone": "0803 835 5522",
-      "notes": "Bank transfer submitted by John",
-      "status": "Confirmed",
-      "createdAt": "2026-03-12T20:58:09.324Z",
-      "approvedAt": "2026-03-12T20:58:42.845Z",
-      "approvedBy": "ugochukwuhenry16@gmail.com"
-    },
-    {
       "orderId": "ORD-1773348985416",
       "productId": "p011",
       "productName": "1 item",
