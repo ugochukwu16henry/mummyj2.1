@@ -244,19 +244,6 @@
       "flaggedAt": "2026-03-12T21:58:03.440Z",
       "flaggedBy": "ugochukwuhenry16@gmail.com",
       "flaggedReason": "cvbnmnbvcxcvb"
-    },
-    {
-      "orderId": "ORD-AUDIT",
-      "productId": "p012",
-      "productName": "Test Item",
-      "qty": 1,
-      "date": "2026-03-12",
-      "time": "10:00",
-      "customerName": "Audit",
-      "phone": "08000000000",
-      "notes": "smoke test",
-      "status": "pending",
-      "createdAt": "2026-03-11T18:52:50.401Z"
     }
   ]
 }
