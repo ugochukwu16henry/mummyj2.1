@@ -16,8 +16,14 @@ function normalizeState(state) {
 }
 
 export function parsePrice(value) {
-  const numeric = String(value).replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(numeric || "0");
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  const source = String(value || "");
+  const match = source.match(/(\d[\d,]*(?:\.\d+)?)/);
+  const numeric = match ? match[1].replace(/,/g, "") : "0";
+  const parsed = Number.parseFloat(numeric);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 

@@ -389,7 +389,8 @@ function updateSummary(items) {
 
   const mobileTitle = document.getElementById("mobile-cart-title");
   if (mobileTitle) {
-    mobileTitle.textContent = `Your Cart (${items.length} item${items.length === 1 ? "" : "s"})`;
+    const totalQty = items.reduce((sum, item) => sum + (Number(item.qty) || 1), 0);
+    mobileTitle.textContent = `Your Cart (${totalQty} item${totalQty === 1 ? "" : "s"})`;
   }
 
   previousTotal = totals.total;
